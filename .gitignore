@@ -38,3 +38,8 @@ out/
 
 ### yaml ###
 application.yaml
+application.properties
+application.yml
+
+.env.dev
+.env.prod
