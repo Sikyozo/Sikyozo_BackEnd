@@ -9,6 +9,8 @@ COPY .env.dev .
 COPY .env.prod .
 
 # 3. Gradle 빌드를 수행
+RUN chmod +x ./gradlew
+
 RUN ./gradlew build
 
 ENV SPRING_PROFILES_ACTIVE=prod
