@@ -7,21 +7,29 @@ import com.spring.sikyozo.domain.order.entity.Order;
 import com.spring.sikyozo.domain.payment.entity.Payment;
 import com.spring.sikyozo.domain.store.entity.Store;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "p_users")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
     private String username;
+
     @Column(nullable = false, unique = true, length = 100)
     private String nickname;
 
@@ -30,10 +38,10 @@ public class User {
 
     @Column(nullable = false)
     private String password;
-    @Enumerated(EnumType.STRING)
+
+    @Enumerated(value = EnumType.STRING)
     @Column(length = 12, nullable = false)
     private UserRole role;
-
 
     // 생성, 수정, 삭제 시간
     @Column(name = "created_at", updatable = false)
