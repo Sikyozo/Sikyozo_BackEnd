@@ -1,7 +1,9 @@
 package com.spring.sikyozo.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spring.sikyozo.domain.user.repository.UserRepository;
 import com.spring.sikyozo.global.redis.RedisDao;
+import com.spring.sikyozo.global.security.jwt.JwtAuthenticationProcessingFilter;
 import com.spring.sikyozo.global.security.jwt.JwtProvider;
 import com.spring.sikyozo.global.security.jwt.login.filter.JsonUsernamePasswordAuthenticationFilter;
 import com.spring.sikyozo.global.security.jwt.login.handler.LoginFailureHandler;
@@ -36,6 +38,7 @@ public class WebSecurityConfig {
     private final JwtProvider jwtProvider;
     private final RedisDao redisDao;
     private final ObjectMapper objectMapper;
+    private final UserRepository userRepository;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -54,6 +57,8 @@ public class WebSecurityConfig {
                 // Custom Filter (UsernamePasswordAuthenticationFilter 실행 전에 jwtAuthFilter를 실행)
                 // addFilterAfter(A,B): B필터 이후에 A 필터가 동작하도록 하는 메서드
                 .addFilterAfter(jsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class)
+                // addFilterBefore(A,B): B필터 이전에 A필터가 동작하도록 하는 메서드
+                .addFilterBefore(jwtAuthenticationProcessingFilter(), JsonUsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
@@ -88,5 +93,10 @@ public class WebSecurityConfig {
         jsonUsernamePasswordAuthenticationFilter.setAuthenticationSuccessHandler(loginSuccessHandler());
         jsonUsernamePasswordAuthenticationFilter.setAuthenticationFailureHandler(loginFailureHandler());
         return jsonUsernamePasswordAuthenticationFilter;
+    }
+
+    @Bean
+    public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
+        return new JwtAuthenticationProcessingFilter(jwtProvider, redisDao, userRepository);
     }
 }
