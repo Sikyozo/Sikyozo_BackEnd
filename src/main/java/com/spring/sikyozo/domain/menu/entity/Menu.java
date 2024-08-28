@@ -91,7 +91,6 @@ public class Menu {
     public void deleteMenu(User user) {
         this.deletedAt = LocalDateTime.now();
         this.deletedBy = user;
-        this.hidden = true;
     }
 
     public void hideMenu(Menu menu) {

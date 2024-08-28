@@ -124,6 +124,7 @@ public class MenuService {
     public GetMenusResponseDto getMenuById(UUID menusId) {
         Menu menu = menuRepository.findById(menusId).orElseThrow(MenuNotFoundException::new);
 
+        // 상품 숨김 상태 확인
         if (menu.isHidden()) {
             throw new MenuHiddenException();
         }
