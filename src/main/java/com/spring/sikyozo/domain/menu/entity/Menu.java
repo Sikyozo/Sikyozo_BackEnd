@@ -1,12 +1,14 @@
 package com.spring.sikyozo.domain.menu.entity;
 
-import com.spring.sikyozo.domain.address.entity.Address;
-import com.spring.sikyozo.domain.order.entity.Order;
+import com.spring.sikyozo.domain.menu.entity.dto.request.CreateMenuRequestDto;
+import com.spring.sikyozo.domain.menu.entity.dto.request.UpdateMenuRequestDto;
 import com.spring.sikyozo.domain.ordermenu.entity.OrderMenu;
-import com.spring.sikyozo.domain.payment.entity.Payment;
 import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,6 +16,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "p_menus")
 public class Menu {
 
@@ -22,7 +27,7 @@ public class Menu {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="store_id", nullable = false)
+    @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 
     @Column(nullable = false, length = 100)
@@ -52,6 +57,8 @@ public class Menu {
     @JoinColumn(name = "deleted_by")
     private User deletedBy;
 
+    // 숨김 처리
+    private boolean hidden = false;
 
     @OneToMany(mappedBy = "menu")
     private List<OrderMenu> orderMenus = new ArrayList<>();
@@ -66,4 +73,32 @@ public class Menu {
         this.createdAt = LocalDateTime.now();
     }
 
+    public void createMenu(CreateMenuRequestDto requestDto, User user, Store store) {
+        this.store = store;
+        this.menuName = requestDto.getMenuName();
+        this.price = requestDto.getPrice();
+        this.menuImg = requestDto.getMenuImg();
+        this.createdBy = user;
+    }
+
+    public void updateMenu(UpdateMenuRequestDto requestDto, User user) {
+        this.menuName = requestDto.getMenuName();
+        this.price = requestDto.getPrice();
+        this.menuImg = requestDto.getMenuImg();
+        this.updatedBy = user;
+    }
+
+    public void deleteMenu(User user) {
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = user;
+        this.hidden = true;
+    }
+
+    public void hideMenu(Menu menu) {
+        this.hidden = true;
+    }
+
+    public void unHideMenu(Menu menu) {
+        this.hidden = false;
+    }
 }
