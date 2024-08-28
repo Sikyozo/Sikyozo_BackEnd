@@ -9,6 +9,9 @@ import com.spring.sikyozo.domain.menu.entity.dto.response.UpdateMenuResponseDto;
 import com.spring.sikyozo.domain.menu.service.MenuService;
 import com.spring.sikyozo.global.exception.dto.ApiSuccessResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -119,16 +122,18 @@ public class MenuController {
                 ));
     }
 
-    // 상품 목록 조회
+    // 상품 목록 조회 (검색)
     @GetMapping("/search")
-    public ResponseEntity<ApiSuccessResponse<List<GetMenusListResponseDto>>> getMenuList(@RequestParam String menuName,
-                                                                                         @RequestParam String storeName) {
+    public ResponseEntity<ApiSuccessResponse<Page<GetMenusListResponseDto>>> getMenuList(
+            @RequestParam String menuName,
+            @RequestParam String storeName,
+            @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         "api/search?menuName=" + menuName + "&storeName=" + storeName,
-                        menuService.getMenuList(menuName, storeName)
+                        menuService.getMenuList(menuName, storeName,pageable)
                 ));
     }
 }
