@@ -11,6 +11,10 @@ import com.spring.sikyozo.domain.user.repository.UserRepository;
 import com.spring.sikyozo.global.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +52,7 @@ public class UserService {
     }
 
     // 사용자 정보 조회
-    public UserResponseDto findMyInfo(Long id) {
+    public UserResponseDto findUserInfo(Long id) {
         User currentUser = securityUtil.getCurrentUser();
 
         if (!currentUser.getId().equals(id) && !isAdmin(currentUser))
@@ -60,8 +64,35 @@ public class UserService {
         return UserResponseDto.fromEntity(targetUser);
     }
 
+    // 사용자 정보 전체 조회 (MANAGER, MASTER)
+    public Page<UserResponseDto> findAllUsers(int page, int size, String search, String sortBy, String sortDirection) {
+        User currentUser = securityUtil.getCurrentUser();
+
+        if (!isAdmin(currentUser))
+            throw new AccessDeniedException();
+
+        // 페이지 크기 제한
+        if (size != 10 && size != 30 && size != 50)
+            size = 10; // 기본 페이지 크기로 고정
+
+        // 정렬 방향 설정
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        // 페이지 요청 객체 생성
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        // 검색어가 있으면 username을 기준으로 검색
+        Page<User> users;
+
+        if (search != null && !search.isEmpty())
+            users = userRepository.findByUsernameContaining(search, pageable);
+        else users = userRepository.findAll(pageable);
+
+        return users.map(UserResponseDto::fromEntity);
+    }
+    
     // 사용자 정보 수정
-    public MessageResponseDto updateMyInfo(Long id, UserInfoUpdateRequestDto dto) {
+    public MessageResponseDto updateUserInfo(Long id, UserInfoUpdateRequestDto dto) {
         User currentUser = securityUtil.getCurrentUser();
 
         if (!currentUser.getId().equals(id) && !isAdmin(currentUser))
