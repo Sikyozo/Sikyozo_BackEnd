@@ -1,5 +1,6 @@
 package com.spring.sikyozo.domain.user.sevice;
 
+import com.spring.sikyozo.domain.user.dto.request.DeleteUserRequestDto;
 import com.spring.sikyozo.domain.user.dto.request.SignUpRequestDto;
 import com.spring.sikyozo.domain.user.dto.request.UserInfoUpdateRequestDto;
 import com.spring.sikyozo.domain.user.dto.response.MessageResponseDto;
@@ -133,13 +134,17 @@ public class UserService {
     }
 
     // 사용자 탈퇴 (Soft Delete)
-    public MessageResponseDto deleteUser(Long id) {
+    public MessageResponseDto deleteUser(Long id, DeleteUserRequestDto dto) {
         User currentUser = securityUtil.getCurrentUser();
         User targetUser = userRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(UserNotFoundException::new);
 
         if (!currentUser.getId().equals(id) && !isAdmin(currentUser))
             throw new AccessDeniedException();
+
+        // 기존 비밀번호 확인
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), currentUser.getPassword()))
+            throw new UserPasswordMismatchException();
 
         targetUser.deleteUser();
         targetUser.deletedBy(currentUser);
