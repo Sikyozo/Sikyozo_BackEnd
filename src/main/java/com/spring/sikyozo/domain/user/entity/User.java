@@ -83,7 +83,19 @@ public class User {
 
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        if (this.deletedAt == null) {
+            this.updatedAt = LocalDateTime.now();
+        }
+    }
+
+    // updated_by
+    public void updatedBy(User currentUser) {
+        this.updatedBy = currentUser;
+    }
+
+    // deleted_by
+    public void deletedBy(User currentUser) {
+        this.deletedBy = currentUser;
     }
 
     // 닉네임 업데이트
@@ -99,5 +111,10 @@ public class User {
     // 비밀번호 업데이트
     public void updatePassword(String encodedNewPassword) {
         this.password = encodedNewPassword;
+    }
+
+    // 사용자 탈퇴 (Soft Delete)
+    public void deleteUser() {
+        this.deletedAt = LocalDateTime.now();
     }
 }

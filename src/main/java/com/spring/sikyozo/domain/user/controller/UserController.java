@@ -88,4 +88,19 @@ public class UserController {
                         userService.updateUserInfo(id, dto)
                 ));
     }
+
+    // 사용자 탈퇴 (Soft Delete)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiSuccessResponse<MessageResponseDto>> deleteUser(
+            @PathVariable("id") Long id,
+            HttpServletRequest servletRequest
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        servletRequest.getServletPath(),
+                        userService.deleteUser(id)
+                ));
+    }
 }

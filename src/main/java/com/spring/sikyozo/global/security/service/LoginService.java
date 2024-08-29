@@ -18,7 +18,7 @@ public class LoginService implements UserDetailsService {
     // username으로 사용자 정보를 조회 후, 시큐리티에서 사용될 UserDetails 객체에 반환
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameAndDeletedAtIsNull(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Not Found " + username));
 
         return org.springframework.security.core.userdetails.User

@@ -58,7 +58,7 @@ public class UserService {
         if (!currentUser.getId().equals(id) && !isAdmin(currentUser))
             throw new AccessDeniedException();
 
-        User targetUser = userRepository.findById(id)
+        User targetUser = userRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(UserNotFoundException::new);
 
         return UserResponseDto.fromEntity(targetUser);
@@ -85,8 +85,8 @@ public class UserService {
         Page<User> users;
 
         if (search != null && !search.isEmpty())
-            users = userRepository.findByUsernameContaining(search, pageable);
-        else users = userRepository.findAll(pageable);
+            users = userRepository.findByUsernameContainingAndDeletedAtIsNull(search, pageable);
+        else users = userRepository.findAllByDeletedAtIsNull(pageable);
 
         return users.map(UserResponseDto::fromEntity);
     }
@@ -98,19 +98,19 @@ public class UserService {
         if (!currentUser.getId().equals(id) && !isAdmin(currentUser))
             throw new AccessDeniedException();
 
-        User targetUser = userRepository.findById(id)
+        User targetUser = userRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(UserNotFoundException::new);
 
         // 닉네임 중복 확인
         if (dto.getNickname() != null && !dto.getNickname().equals(targetUser.getNickname())) {
             checkNicknameDuplication(dto.getNickname());
-            currentUser.updateNickname(dto.getNickname());
+            targetUser.updateNickname(dto.getNickname());
         }
 
         // 이메일 중복 확인
         if (dto.getEmail() != null && !dto.getEmail().equals(targetUser.getEmail())) {
             checkEmailDuplication(dto.getEmail());
-            currentUser.updateEmail(dto.getEmail());
+            targetUser.updateEmail(dto.getEmail());
         }
 
         if (dto.getNewPassword() != null && !dto.getNewPassword().isEmpty()) {
@@ -126,9 +126,26 @@ public class UserService {
             targetUser.updatePassword(passwordEncoder.encode(dto.getNewPassword()));
         }
 
+        targetUser.updatedBy(currentUser);
         userRepository.save(targetUser);
 
         return new MessageResponseDto("사용자 정보가 성공적으로 수정되었습니다.");
+    }
+
+    // 사용자 탈퇴 (Soft Delete)
+    public MessageResponseDto deleteUser(Long id) {
+        User currentUser = securityUtil.getCurrentUser();
+        User targetUser = userRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(UserNotFoundException::new);
+
+        if (!currentUser.getId().equals(id) && !isAdmin(currentUser))
+            throw new AccessDeniedException();
+
+        targetUser.deleteUser();
+        targetUser.deletedBy(currentUser);
+        userRepository.save(targetUser);
+
+        return new MessageResponseDto("사용자 정보가 성공적으로 탈퇴 처리되었습니다.");
     }
 
     // MANAGER, MASTER 권한 체크
