@@ -7,16 +7,14 @@ import com.spring.sikyozo.domain.order.entity.Order;
 import com.spring.sikyozo.domain.payment.entity.Payment;
 import com.spring.sikyozo.domain.store.entity.Store;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -53,6 +51,7 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by")
     private User updatedBy;
+
     private LocalDateTime deletedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -77,13 +76,28 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Ai> ai = new ArrayList<>();
 
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+    // 닉네임 업데이트
+    public void updateNickname(String newNickname) {
+        this.nickname = newNickname;
+    }
+
+    // 이메일 업데이트
+    public void updateEmail(String newEmail) {
+        this.email = newEmail;
+    }
+
+    // 비밀번호 업데이트
+    public void updatePassword(String encodedNewPassword) {
+        this.password = encodedNewPassword;
     }
 }
