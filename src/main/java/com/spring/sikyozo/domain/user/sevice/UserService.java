@@ -1,5 +1,6 @@
 package com.spring.sikyozo.domain.user.sevice;
 
+import com.spring.sikyozo.domain.user.dto.request.DeleteUserRequestDto;
 import com.spring.sikyozo.domain.user.dto.request.SignUpRequestDto;
 import com.spring.sikyozo.domain.user.dto.request.UserInfoUpdateRequestDto;
 import com.spring.sikyozo.domain.user.dto.response.MessageResponseDto;
@@ -11,6 +12,10 @@ import com.spring.sikyozo.domain.user.repository.UserRepository;
 import com.spring.sikyozo.global.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -48,38 +53,65 @@ public class UserService {
     }
 
     // 사용자 정보 조회
-    public UserResponseDto findMyInfo(Long id) {
+    public UserResponseDto findUserInfo(Long id) {
         User currentUser = securityUtil.getCurrentUser();
 
         if (!currentUser.getId().equals(id) && !isAdmin(currentUser))
             throw new AccessDeniedException();
 
-        User targetUser = userRepository.findById(id)
+        User targetUser = userRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(UserNotFoundException::new);
 
         return UserResponseDto.fromEntity(targetUser);
     }
 
+    // 사용자 정보 전체 조회 (MANAGER, MASTER)
+    public Page<UserResponseDto> findAllUsers(int page, int size, String search, String sortBy, String sortDirection) {
+        User currentUser = securityUtil.getCurrentUser();
+
+        if (!isAdmin(currentUser))
+            throw new AccessDeniedException();
+
+        // 페이지 크기 제한
+        if (size != 10 && size != 30 && size != 50)
+            size = 10; // 기본 페이지 크기로 고정
+
+        // 정렬 방향 설정
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        // 페이지 요청 객체 생성
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        // 검색어가 있으면 username을 기준으로 검색
+        Page<User> users;
+
+        if (search != null && !search.isEmpty())
+            users = userRepository.findByUsernameContainingAndDeletedAtIsNull(search, pageable);
+        else users = userRepository.findAllByDeletedAtIsNull(pageable);
+
+        return users.map(UserResponseDto::fromEntity);
+    }
+    
     // 사용자 정보 수정
-    public MessageResponseDto updateMyInfo(Long id, UserInfoUpdateRequestDto dto) {
+    public MessageResponseDto updateUserInfo(Long id, UserInfoUpdateRequestDto dto) {
         User currentUser = securityUtil.getCurrentUser();
 
         if (!currentUser.getId().equals(id) && !isAdmin(currentUser))
             throw new AccessDeniedException();
 
-        User targetUser = userRepository.findById(id)
+        User targetUser = userRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(UserNotFoundException::new);
 
         // 닉네임 중복 확인
         if (dto.getNickname() != null && !dto.getNickname().equals(targetUser.getNickname())) {
             checkNicknameDuplication(dto.getNickname());
-            currentUser.updateNickname(dto.getNickname());
+            targetUser.updateNickname(dto.getNickname());
         }
 
         // 이메일 중복 확인
         if (dto.getEmail() != null && !dto.getEmail().equals(targetUser.getEmail())) {
             checkEmailDuplication(dto.getEmail());
-            currentUser.updateEmail(dto.getEmail());
+            targetUser.updateEmail(dto.getEmail());
         }
 
         if (dto.getNewPassword() != null && !dto.getNewPassword().isEmpty()) {
@@ -95,9 +127,30 @@ public class UserService {
             targetUser.updatePassword(passwordEncoder.encode(dto.getNewPassword()));
         }
 
+        targetUser.updatedBy(currentUser);
         userRepository.save(targetUser);
 
         return new MessageResponseDto("사용자 정보가 성공적으로 수정되었습니다.");
+    }
+
+    // 사용자 탈퇴 (Soft Delete)
+    public MessageResponseDto deleteUser(Long id, DeleteUserRequestDto dto) {
+        User currentUser = securityUtil.getCurrentUser();
+        User targetUser = userRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(UserNotFoundException::new);
+
+        if (!currentUser.getId().equals(id) && !isAdmin(currentUser))
+            throw new AccessDeniedException();
+
+        // 기존 비밀번호 확인
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), currentUser.getPassword()))
+            throw new UserPasswordMismatchException();
+
+        targetUser.deleteUser();
+        targetUser.deletedBy(currentUser);
+        userRepository.save(targetUser);
+
+        return new MessageResponseDto("사용자 정보가 성공적으로 탈퇴 처리되었습니다.");
     }
 
     // MANAGER, MASTER 권한 체크

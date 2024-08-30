@@ -1,5 +1,6 @@
 package com.spring.sikyozo.domain.user.controller;
 
+import com.spring.sikyozo.domain.user.dto.request.DeleteUserRequestDto;
 import com.spring.sikyozo.domain.user.dto.request.SignUpRequestDto;
 import com.spring.sikyozo.domain.user.dto.request.UserInfoUpdateRequestDto;
 import com.spring.sikyozo.domain.user.dto.response.MessageResponseDto;
@@ -10,9 +11,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -41,7 +42,7 @@ public class UserController {
 
     // 사용자 정보 조회
     @GetMapping("/{id}")
-    public ResponseEntity<ApiSuccessResponse<UserResponseDto>> getMyInfo(
+    public ResponseEntity<ApiSuccessResponse<UserResponseDto>> getUserInfo(
             @PathVariable("id") Long id,
             HttpServletRequest servletRequest
     ) {
@@ -50,13 +51,32 @@ public class UserController {
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servletRequest.getServletPath(),
-                        userService.findMyInfo(id)
+                        userService.findUserInfo(id)
+                ));
+    }
+
+    // 사용자 정보 전체 조회 (MANAGER, MASTER)
+    @GetMapping()
+    public ResponseEntity<ApiSuccessResponse<Page<UserResponseDto>>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "") String search,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            HttpServletRequest servletRequest
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        servletRequest.getServletPath(),
+                        userService.findAllUsers(page, size, search, sortBy, sortDirection)
                 ));
     }
 
     // 사용자 정보 수정
     @PutMapping("/{id}")
-    public ResponseEntity<ApiSuccessResponse<MessageResponseDto>> updateMyInfo(
+    public ResponseEntity<ApiSuccessResponse<MessageResponseDto>> updateUserInfo(
             @PathVariable("id") Long id,
             @RequestBody UserInfoUpdateRequestDto dto,
             HttpServletRequest servletRequest
@@ -66,7 +86,23 @@ public class UserController {
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servletRequest.getServletPath(),
-                        userService.updateMyInfo(id, dto)
+                        userService.updateUserInfo(id, dto)
+                ));
+    }
+
+    // 사용자 탈퇴 (Soft Delete)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiSuccessResponse<MessageResponseDto>> deleteUser(
+            @PathVariable("id") Long id,
+            @RequestBody @Valid DeleteUserRequestDto dto,
+            HttpServletRequest servletRequest
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        servletRequest.getServletPath(),
+                        userService.deleteUser(id, dto)
                 ));
     }
 }
