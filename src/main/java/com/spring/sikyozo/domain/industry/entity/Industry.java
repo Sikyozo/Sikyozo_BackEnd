@@ -3,11 +3,15 @@ package com.spring.sikyozo.domain.industry.entity;
 import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Getter
 @Entity
+@NoArgsConstructor
 @Table(name="p_industry")
 public class Industry {
 
@@ -16,7 +20,7 @@ public class Industry {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="store_id", nullable = false)
+    @JoinColumn(name="store_id")
     private Store store;
 
     @Column(nullable = false, length=100)
@@ -41,6 +45,11 @@ public class Industry {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "deleted_by")
     private User deletedBy;
+
+    public Industry(String name, Store store) {
+        this.industryName = name;
+        this.store = store;
+    }
 
 
     @PreUpdate

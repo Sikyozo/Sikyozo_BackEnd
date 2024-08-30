@@ -7,11 +7,13 @@ import com.spring.sikyozo.domain.order.entity.Order;
 import com.spring.sikyozo.domain.payment.entity.Payment;
 import com.spring.sikyozo.domain.store.entity.Store;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 @Entity
 @Table(name = "p_users")
 public class User {
