@@ -7,6 +7,7 @@ import com.spring.sikyozo.domain.region.repository.RegionRepository;
 import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.store.entity.dto.request.CreateStoreRequestDto;
 import com.spring.sikyozo.domain.store.entity.dto.request.UpdateStoreRequestDto;
+import com.spring.sikyozo.domain.store.entity.dto.response.SearchStoreResponseDto;
 import com.spring.sikyozo.domain.store.entity.dto.response.StoreResponseDto;
 import com.spring.sikyozo.domain.store.entity.dto.response.UpdateStoreResponseDto;
 import com.spring.sikyozo.domain.store.exception.StoreNotFoundException;
@@ -17,6 +18,8 @@ import com.spring.sikyozo.domain.user.entity.User;
 import com.spring.sikyozo.domain.user.entity.UserRole;
 import com.spring.sikyozo.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -173,9 +176,18 @@ public class StoreService {
     }
 
     // 가게 목록 조회 (검색)
-    public void searchStores(Long userId, String menuName, String industryName) {
+    @Transactional(readOnly = true)
+    public SearchStoreResponseDto searchStores(Long userId, String menuName, String industryName, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 회원입니다.")
         );
+
+        if (!UserRole.CUSTOMER.equals(user.getRole()) && !UserRole.MANAGER.equals(user.getRole()) ) {
+            throw new IllegalArgumentException("가게 검색 기능을 사용할 수 없습니다.");
+        }
+
+        Page<Store> storeList = storeRepository.findByMenuNameAndIndustryName(menuName, industryName,pageable);
+
+        return new  SearchStoreResponseDto(storeList);
     }
 }

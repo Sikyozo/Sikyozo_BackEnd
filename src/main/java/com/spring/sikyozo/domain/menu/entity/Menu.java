@@ -63,6 +63,9 @@ public class Menu {
     @OneToMany(mappedBy = "menu")
     private List<OrderMenu> orderMenus = new ArrayList<>();
 
+    @OneToMany(mappedBy = "menu")
+    private List<Store> stores = new ArrayList<>();
+
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();

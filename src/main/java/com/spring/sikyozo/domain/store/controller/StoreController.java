@@ -9,6 +9,8 @@ import com.spring.sikyozo.global.exception.dto.ApiSuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -69,12 +71,29 @@ public class StoreController {
                 ));
     }
 
-//    // 가게 목록 조회 (검색)
-//    @GetMapping("/search")
-//    public ResponseEntity<ApiSuccessResponse<?>> searchStores(
-//            @RequestParam Long userId,
-//            @RequestParam String menuName,
-//            @RequestParam String industryName) {
-//        storeService.searchStores(userId, menuName, industryName);
-//    }
+    // 가게 목록 조회 (검색)
+    @GetMapping("/search")
+    public ResponseEntity<ApiSuccessResponse<?>> searchStores(
+            @RequestParam Long userId,
+            @RequestParam(required = false) String menuName,
+            @RequestParam(required = false) String industryName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest servletRequest) {
+
+        // 페이지 크기 제한 ( 10, 30, 50 이외의 값은 기본적으로 10으로 설정)
+        if (size != 10 && size != 30 && size != 50) {
+            size = 10;
+        }
+
+         Pageable pageable = PageRequest.of(page, size);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        servletRequest.getServletPath(),
+                        storeService.searchStores(userId, menuName, industryName,pageable)
+                ));
+    }
 }

@@ -1,6 +1,7 @@
 package com.spring.sikyozo.domain.store.entity;
 
 import com.spring.sikyozo.domain.industry.entity.Industry;
+import com.spring.sikyozo.domain.menu.entity.Menu;
 import com.spring.sikyozo.domain.payment.entity.Payment;
 import com.spring.sikyozo.domain.region.entity.Region;
 import com.spring.sikyozo.domain.store.entity.dto.request.CreateStoreRequestDto;
@@ -31,6 +32,10 @@ public class Store {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "region_id")
     private Region region;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "menu_id")
+    private Menu menu;
 
     @Column(nullable = false, length = 100)
     private String storeName;
