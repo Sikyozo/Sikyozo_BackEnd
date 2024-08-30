@@ -34,6 +34,16 @@ public class WebSecurityConfig {
             "/api/users/**"
     };
 
+    private static final String[] INDUSTRY_API_URL = {
+            "/api/industries",
+            "/api/industries/**"
+    };
+
+    private static final String[] STORE_API_URL = {
+            "/api/stores",
+            "/api/stores/**"
+    };
+
     private final LoginService loginService;
     private final JwtProvider jwtProvider;
     private final RedisDao redisDao;
@@ -47,10 +57,11 @@ public class WebSecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // 홈 경로와 정적 리소스는 모두에게 허용
                         .requestMatchers("/").permitAll()
-                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // 정적 리소스
                         .requestMatchers(USER_API_URL).permitAll()
+                        .requestMatchers(INDUSTRY_API_URL).permitAll()
+                        .requestMatchers(STORE_API_URL).permitAll()
                 )
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
