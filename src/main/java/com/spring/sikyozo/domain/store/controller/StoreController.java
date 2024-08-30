@@ -37,21 +37,21 @@ public class StoreController {
                 ));
     }
 
-//    // 가게 수정
-//    @PutMapping("/{storeId}")
-//    public ResponseEntity<ApiSuccessResponse<UpdateStoreResponseDto>> updateStore(
-//            @PathVariable UUID storeId,
-//            @RequestParam Long userId,
-//            @RequestBody UpdateStoreRequestDto requestDto,
-//            HttpServletRequest servletRequest) {
-//        return ResponseEntity
-//                .status(HttpStatus.OK)
-//                .body(ApiSuccessResponse.of(
-//                        HttpStatus.OK,
-//                        servletRequest.getServletPath(),
-//                        storeService.updateStore(storeId, userId, requestDto)
-//                ));
-//    }
+    // 가게 수정
+    @PutMapping("/{storeId}")
+    public ResponseEntity<ApiSuccessResponse<UpdateStoreResponseDto>> updateStore(
+            @PathVariable UUID storeId,
+            @RequestParam Long userId,
+            @RequestBody UpdateStoreRequestDto requestDto,
+            HttpServletRequest servletRequest) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        servletRequest.getServletPath(),
+                        storeService.updateStore(storeId, userId, requestDto)
+                ));
+    }
 
 //    // 가게 삭제
 //    @PutMapping("/delete/{storeId}")

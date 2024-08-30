@@ -62,4 +62,13 @@ public class StoreIndustry {
         this.store = store;
         this.industry = industry;
     }
+
+    public void deleteStoreIndustry(User user) {
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = user;
+    }
+
+    public void setDeletedAt(Object o) {
+        this.deletedAt = null;
+    }
 }
