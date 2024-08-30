@@ -3,14 +3,17 @@ package com.spring.sikyozo.domain.store.entity;
 import com.spring.sikyozo.domain.industry.entity.Industry;
 import com.spring.sikyozo.domain.payment.entity.Payment;
 import com.spring.sikyozo.domain.region.entity.Region;
+import com.spring.sikyozo.domain.store.entity.dto.request.CreateStoreRequestDto;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Getter
 @Entity
 @Table(name = "p_stores")
 public class Store {
@@ -59,11 +62,24 @@ public class Store {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    // 가게 생성
+    public void createStore(CreateStoreRequestDto requestDto, User user, Region region) {
+        this.user = user;
+        this.region = region;
+        this.storeName = requestDto.getStoreName();
+        this.storeImg = requestDto.getStoreImg();
+    }
+
+    public void setIndustries(List<Industry> industries) {
+        this.industries = industries;
     }
 
 }
