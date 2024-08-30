@@ -1,5 +1,6 @@
 package com.spring.sikyozo.domain.user.controller;
 
+import com.spring.sikyozo.domain.user.dto.request.DeleteUserRequestDto;
 import com.spring.sikyozo.domain.user.dto.request.SignUpRequestDto;
 import com.spring.sikyozo.domain.user.dto.request.UserInfoUpdateRequestDto;
 import com.spring.sikyozo.domain.user.dto.response.MessageResponseDto;
@@ -93,6 +94,7 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiSuccessResponse<MessageResponseDto>> deleteUser(
             @PathVariable("id") Long id,
+            @RequestBody @Valid DeleteUserRequestDto dto,
             HttpServletRequest servletRequest
     ) {
         return ResponseEntity
@@ -100,7 +102,7 @@ public class UserController {
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servletRequest.getServletPath(),
-                        userService.deleteUser(id)
+                        userService.deleteUser(id, dto)
                 ));
     }
 }

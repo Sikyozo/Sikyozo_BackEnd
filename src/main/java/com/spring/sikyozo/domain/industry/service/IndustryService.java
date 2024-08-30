@@ -20,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -74,7 +75,7 @@ public class IndustryService {
     }
 
     // 업종 수정
-    public IndustryResponseDto updateIndustry(Long id, IndustryRequestDto dto) {
+    public IndustryResponseDto updateIndustry(UUID id, IndustryRequestDto dto) {
         User currentUser = securityUtil.getCurrentUser();
 
         if (!isAdmin(currentUser)) {
@@ -97,7 +98,7 @@ public class IndustryService {
     }
 
     // 업종 삭제 (Soft Delete)
-    public MessageResponseDto deleteIndustry(Long id) {
+    public MessageResponseDto deleteIndustry(UUID id) {
         User currentUser = securityUtil.getCurrentUser();
 
         if (!isAdmin(currentUser)) {
