@@ -2,6 +2,7 @@ package com.spring.sikyozo.domain.store.entity.dto.response;
 
 import com.spring.sikyozo.domain.industry.entity.Industry;
 import com.spring.sikyozo.domain.store.entity.Store;
+import com.spring.sikyozo.domain.storeindustry.entity.StoreIndustry;
 import lombok.Getter;
 
 import java.util.List;
@@ -21,8 +22,9 @@ public class StoreResponseDto {
         this.regionName = store.getRegion().getRegionName();
         this.storeName = store.getStoreName();
         this.storeImg = store.getStoreImg();
-        this.industryNames = store.getIndustries().stream()
-                .map(Industry::getIndustryName)
+        this.industryNames = store.getStoreIndustries().stream()
+                .map(storeIndustry -> storeIndustry.getIndustry().getIndustryName())
                 .collect(Collectors.toList());
     }
+
 }

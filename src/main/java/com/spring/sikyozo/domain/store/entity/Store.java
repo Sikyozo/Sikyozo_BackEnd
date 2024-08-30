@@ -5,6 +5,7 @@ import com.spring.sikyozo.domain.payment.entity.Payment;
 import com.spring.sikyozo.domain.region.entity.Region;
 import com.spring.sikyozo.domain.store.entity.dto.request.CreateStoreRequestDto;
 import com.spring.sikyozo.domain.store.entity.dto.request.UpdateStoreRequestDto;
+import com.spring.sikyozo.domain.storeindustry.entity.StoreIndustry;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -58,7 +59,7 @@ public class Store {
     private List<Payment> payments = new ArrayList<>();
 
     @OneToMany(mappedBy = "store")
-    private List<Industry> industries = new ArrayList<>();
+    private List<StoreIndustry> storeIndustries = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
@@ -79,9 +80,9 @@ public class Store {
         this.storeImg = requestDto.getStoreImg();
     }
 
-    // 가게 업종 추가
-    public void setIndustries(List<Industry> industries) {
-        this.industries = industries;
+    //가게 업종 추가
+    public void setStoreIndustries(List<StoreIndustry> industries) {
+        this.storeIndustries = industries;
     }
 
     // 가게 수정
@@ -91,7 +92,7 @@ public class Store {
         this.storeName = requestDto.getStoreName();
         this.storeImg = requestDto.getStoreImg();
         this.updatedAt = LocalDateTime.now();
-        this.industries = updateIndustries;
+//        this.industries = updateIndustries;
     }
 
     public void deleteStore(User user) {

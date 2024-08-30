@@ -1,12 +1,15 @@
 package com.spring.sikyozo.domain.industry.entity;
 
 import com.spring.sikyozo.domain.store.entity.Store;
+import com.spring.sikyozo.domain.storeindustry.entity.StoreIndustry;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -18,10 +21,6 @@ public class Industry {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="store_id")
-    private Store store;
 
     @Column(nullable = false, length=100)
     private String industryName;
@@ -46,10 +45,13 @@ public class Industry {
     @JoinColumn(name = "deleted_by")
     private User deletedBy;
 
-    public Industry(String name, Store store,User user) {
-        this.industryName = name;
-        this.store = store;
-    }
+    @OneToMany(mappedBy = "industry")
+    private List<StoreIndustry> storeIndustries = new ArrayList<>();
+
+//    public Industry(String name, Store store,User user) {
+//        this.industryName = name;
+//        this.store = store;
+//    }
 
 
     @PreUpdate

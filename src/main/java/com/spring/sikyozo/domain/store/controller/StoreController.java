@@ -7,6 +7,7 @@ import com.spring.sikyozo.domain.store.entity.dto.response.UpdateStoreResponseDt
 import com.spring.sikyozo.domain.store.service.StoreService;
 import com.spring.sikyozo.global.exception.dto.ApiSuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,35 +37,44 @@ public class StoreController {
                 ));
     }
 
-    // 가게 수정
-    @PutMapping("/{storeId}")
-    public ResponseEntity<ApiSuccessResponse<UpdateStoreResponseDto>> updateStore(
-            @PathVariable UUID storeId,
-            @RequestParam Long userId,
-            @RequestBody UpdateStoreRequestDto requestDto,
-            HttpServletRequest servletRequest) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiSuccessResponse.of(
-                        HttpStatus.OK,
-                        servletRequest.getServletPath(),
-                        storeService.updateStore(storeId, userId, requestDto)
-                ));
-    }
+//    // 가게 수정
+//    @PutMapping("/{storeId}")
+//    public ResponseEntity<ApiSuccessResponse<UpdateStoreResponseDto>> updateStore(
+//            @PathVariable UUID storeId,
+//            @RequestParam Long userId,
+//            @RequestBody UpdateStoreRequestDto requestDto,
+//            HttpServletRequest servletRequest) {
+//        return ResponseEntity
+//                .status(HttpStatus.OK)
+//                .body(ApiSuccessResponse.of(
+//                        HttpStatus.OK,
+//                        servletRequest.getServletPath(),
+//                        storeService.updateStore(storeId, userId, requestDto)
+//                ));
+//    }
 
-    // 가게 삭제
-    @PutMapping("/delete/{storeId}")
-    public ResponseEntity<ApiSuccessResponse<String>> deleteStore(
-            @PathVariable UUID storeId,
-            @RequestParam Long userId,
-            HttpServletRequest servletRequest) {
-        storeService.deleteStore(storeId, userId);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiSuccessResponse.of(
-                        HttpStatus.OK,
-                        servletRequest.getServletPath(),
-                        "삭제 완료 되었습니다."
-                ));
-    }
+//    // 가게 삭제
+//    @PutMapping("/delete/{storeId}")
+//    public ResponseEntity<ApiSuccessResponse<String>> deleteStore(
+//            @PathVariable UUID storeId,
+//            @RequestParam Long userId,
+//            HttpServletRequest servletRequest) {
+//        storeService.deleteStore(storeId, userId);
+//        return ResponseEntity
+//                .status(HttpStatus.OK)
+//                .body(ApiSuccessResponse.of(
+//                        HttpStatus.OK,
+//                        servletRequest.getServletPath(),
+//                        "삭제 완료 되었습니다."
+//                ));
+//    }
+
+//    // 가게 목록 조회 (검색)
+//    @GetMapping("/search")
+//    public ResponseEntity<ApiSuccessResponse<?>> searchStores(
+//            @RequestParam Long userId,
+//            @RequestParam String menuName,
+//            @RequestParam String industryName) {
+//        storeService.searchStores(userId, menuName, industryName);
+//    }
 }
