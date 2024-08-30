@@ -4,6 +4,7 @@ import com.spring.sikyozo.domain.industry.entity.Industry;
 import com.spring.sikyozo.domain.payment.entity.Payment;
 import com.spring.sikyozo.domain.region.entity.Region;
 import com.spring.sikyozo.domain.store.entity.dto.request.CreateStoreRequestDto;
+import com.spring.sikyozo.domain.store.entity.dto.request.UpdateStoreRequestDto;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -78,8 +79,19 @@ public class Store {
         this.storeImg = requestDto.getStoreImg();
     }
 
+    // 가게 업종 추가
     public void setIndustries(List<Industry> industries) {
         this.industries = industries;
+    }
+
+    // 가게 수정
+    public void updateStore(UpdateStoreRequestDto requestDto, User user, Region region,List<Industry> updateIndustries ) {
+        this.updatedBy = user;
+        this.region = region;
+        this.storeName = requestDto.getStoreName();
+        this.storeImg = requestDto.getStoreImg();
+        this.updatedAt = LocalDateTime.now();
+        this.industries = updateIndustries;
     }
 
 }

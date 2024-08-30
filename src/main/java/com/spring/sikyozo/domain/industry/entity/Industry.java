@@ -46,7 +46,7 @@ public class Industry {
     @JoinColumn(name = "deleted_by")
     private User deletedBy;
 
-    public Industry(String name, Store store) {
+    public Industry(String name, Store store,User user) {
         this.industryName = name;
         this.store = store;
     }
@@ -60,6 +60,13 @@ public class Industry {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // 삭제된 업종 소프트 딜리트 처리
+    public void deleteIndustry(User user) {
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = user;
     }
 
 }
