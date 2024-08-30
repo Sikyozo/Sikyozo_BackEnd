@@ -11,6 +11,7 @@ import com.spring.sikyozo.domain.store.entity.dto.response.SearchStoreResponseDt
 import com.spring.sikyozo.domain.store.entity.dto.response.StoreResponseDto;
 import com.spring.sikyozo.domain.store.entity.dto.response.UpdateStoreResponseDto;
 import com.spring.sikyozo.domain.store.exception.StoreNotFoundException;
+import com.spring.sikyozo.domain.store.exception.StorePermissionException;
 import com.spring.sikyozo.domain.store.repository.StoreRepository;
 import com.spring.sikyozo.domain.storeindustry.entity.StoreIndustry;
 import com.spring.sikyozo.domain.storeindustry.repository.StoreIndustryRepository;
@@ -43,7 +44,7 @@ public class StoreService {
         );
 
         if (!UserRole.OWNER.equals(user.getRole())) {
-            throw new IllegalArgumentException("가게 주인 회원이 아닙니다.");
+            throw new StorePermissionException();
         }
 
         Region region = regionRepository.findByRegionName(requestDto.getRegionName()).orElseThrow(
@@ -104,8 +105,8 @@ public class StoreService {
                 () -> new IllegalArgumentException("존재하지 않는 회원입니다.")
         );
 
-        if (!UserRole.OWNER.equals(user.getRole())) {
-            throw new IllegalArgumentException("가게 주인 회원이 아닙니다.");
+        if (!UserRole.OWNER.equals(user.getRole()) && !UserRole.MANAGER.equals(user.getRole())) {
+            throw new StorePermissionException();
         }
 
         // 지역 확인
@@ -156,8 +157,8 @@ public class StoreService {
                 () -> new IllegalArgumentException("존재하지 않는 회원입니다.")
         );
 
-        if (!UserRole.OWNER.equals(user.getRole())) {
-            throw new IllegalArgumentException("가게 주인 회원이 아닙니다.");
+        if (!UserRole.OWNER.equals(user.getRole()) && !UserRole.MANAGER.equals(user.getRole())) {
+            throw new StorePermissionException();
         }
 
         // 가게 존재 여부 확인
@@ -178,9 +179,7 @@ public class StoreService {
     // 가게 목록 조회 (검색)
     @Transactional(readOnly = true)
     public SearchStoreResponseDto searchStores(Long userId, String menuName, String industryName, Pageable pageable) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 회원입니다.")
-        );
+        User user = userRepository.findById(userId).orElseThrow(StorePermissionException::new);
 
         if (!UserRole.CUSTOMER.equals(user.getRole()) && !UserRole.MANAGER.equals(user.getRole()) ) {
             throw new IllegalArgumentException("가게 검색 기능을 사용할 수 없습니다.");
