@@ -132,4 +132,30 @@ public class StoreService {
         List<Industry> updatedIndustries = industryRepository.findByStoreIdAndDeletedAtIsNull(storeId);
         return new UpdateStoreResponseDto(store,updatedIndustries);
     }
+
+    // 가게 삭제
+    public void deleteStore(UUID storeId, Long userId) {
+        // 유저확인 & 가게주인 회원인지 확인
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 회원입니다.")
+        );
+
+        if (!UserRole.OWNER.equals(user.getRole())) {
+            throw new IllegalArgumentException("가게 주인 회원이 아닙니다.");
+        }
+
+        // 가게 존재 여부 확인
+        Store store = storeRepository.findById(storeId).orElseThrow(StoreNotFoundException::new);
+        store.deleteStore(user);
+
+        // 가게와 관련된 업종 소프트 딜리트 처리
+        List<Industry> industryList = industryRepository.findByStore(store);
+
+        industryList.forEach(industry ->{
+            industry.deleteIndustry(user);
+            industryRepository.save(industry);
+        });
+
+        storeRepository.save(store);
+    }
 }

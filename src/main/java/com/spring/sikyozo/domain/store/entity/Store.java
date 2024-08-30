@@ -85,13 +85,18 @@ public class Store {
     }
 
     // 가게 수정
-    public void updateStore(UpdateStoreRequestDto requestDto, User user, Region region,List<Industry> updateIndustries ) {
+    public void updateStore(UpdateStoreRequestDto requestDto, User user, Region region, List<Industry> updateIndustries) {
         this.updatedBy = user;
         this.region = region;
         this.storeName = requestDto.getStoreName();
         this.storeImg = requestDto.getStoreImg();
         this.updatedAt = LocalDateTime.now();
         this.industries = updateIndustries;
+    }
+
+    public void deleteStore(User user) {
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = user;
     }
 
 }

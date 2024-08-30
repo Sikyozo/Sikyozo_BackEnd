@@ -40,7 +40,7 @@ public class StoreController {
     @PutMapping("/{storeId}")
     public ResponseEntity<ApiSuccessResponse<UpdateStoreResponseDto>> updateStore(
             @PathVariable UUID storeId,
-            @RequestParam Long id,
+            @RequestParam Long userId,
             @RequestBody UpdateStoreRequestDto requestDto,
             HttpServletRequest servletRequest) {
         return ResponseEntity
@@ -48,7 +48,23 @@ public class StoreController {
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servletRequest.getServletPath(),
-                        storeService.updateStore(storeId, id, requestDto)
+                        storeService.updateStore(storeId, userId, requestDto)
+                ));
+    }
+
+    // 가게 삭제
+    @PutMapping("/delete/{storeId}")
+    public ResponseEntity<ApiSuccessResponse<String>> deleteStore(
+            @PathVariable UUID storeId,
+            @RequestParam Long userId,
+            HttpServletRequest servletRequest) {
+        storeService.deleteStore(storeId, userId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        servletRequest.getServletPath(),
+                        "삭제 완료 되었습니다."
                 ));
     }
 }
