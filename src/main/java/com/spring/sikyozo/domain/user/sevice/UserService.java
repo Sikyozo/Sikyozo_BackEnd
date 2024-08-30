@@ -1,5 +1,6 @@
 package com.spring.sikyozo.domain.user.sevice;
 
+import com.spring.sikyozo.domain.user.dto.request.DeleteUserRequestDto;
 import com.spring.sikyozo.domain.user.dto.request.SignUpRequestDto;
 import com.spring.sikyozo.domain.user.dto.request.UserInfoUpdateRequestDto;
 import com.spring.sikyozo.domain.user.dto.response.MessageResponseDto;
@@ -41,7 +42,7 @@ public class UserService {
 
         // 비밀번호 확인
         if (!dto.getPassword().equals(dto.getPasswordCheck()))
-            throw new UserPasswordMismatchException();
+            throw new PasswordMismatchException();
 
         // 비밀번호 인코딩
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
@@ -116,11 +117,11 @@ public class UserService {
         if (dto.getNewPassword() != null && !dto.getNewPassword().isEmpty()) {
             // 기존 비밀번호 확인
             if (!passwordEncoder.matches(dto.getCurrentPassword(), targetUser.getPassword()))
-                throw new UserPasswordMismatchException();
+                throw new PasswordMismatchException();
 
             // 새 비밀번호 확인
             if (!dto.getNewPassword().equals(dto.getNewPasswordCheck()))
-                throw new UserPasswordMismatchException();
+                throw new PasswordMismatchException();
 
             // 새 비밀번호 인코딩 및 저장
             targetUser.updatePassword(passwordEncoder.encode(dto.getNewPassword()));
@@ -133,13 +134,17 @@ public class UserService {
     }
 
     // 사용자 탈퇴 (Soft Delete)
-    public MessageResponseDto deleteUser(Long id) {
+    public MessageResponseDto deleteUser(Long id, DeleteUserRequestDto dto) {
         User currentUser = securityUtil.getCurrentUser();
         User targetUser = userRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(UserNotFoundException::new);
 
         if (!currentUser.getId().equals(id) && !isAdmin(currentUser))
             throw new AccessDeniedException();
+
+        // 기존 비밀번호 확인
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), currentUser.getPassword()))
+            throw new PasswordMismatchException();
 
         targetUser.deleteUser();
         targetUser.deletedBy(currentUser);
@@ -157,7 +162,7 @@ public class UserService {
     private void checkUsernameDuplication(String username) {
         Optional<User> checkUsername = userRepository.findByUsername(username);
         if (checkUsername.isPresent()) {
-            throw new UserDuplicateUsernameException();
+            throw new DuplicateUsernameException();
         }
     }
 
@@ -165,7 +170,7 @@ public class UserService {
     private void checkNicknameDuplication(String nickname) {
         Optional<User> checkNickname = userRepository.findByNickname(nickname);
         if (checkNickname.isPresent()) {
-            throw new UserDuplicateNicknameException();
+            throw new DuplicateNicknameException();
         }
     }
 
@@ -173,7 +178,7 @@ public class UserService {
     private void checkEmailDuplication(String email) {
         Optional<User> checkEmail = userRepository.findByEmail(email);
         if (checkEmail.isPresent()) {
-            throw new UserDuplicateEmailException();
+            throw new DuplicateEmailException();
         }
     }
 }

@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -58,7 +60,7 @@ public class IndustryController {
     // 업종 수정
     @PutMapping("/{id}")
     public ResponseEntity<ApiSuccessResponse<IndustryResponseDto>> updateIndustry(
-            @PathVariable("id") Long id,
+            @PathVariable("id") UUID id,
             @Valid @RequestBody IndustryRequestDto dto,
             HttpServletRequest servletRequest
     ) {
@@ -74,7 +76,7 @@ public class IndustryController {
     // 업종 삭제 (Soft Delete)
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiSuccessResponse<MessageResponseDto>> deleteIndustry(
-            @PathVariable("id") Long id,
+            @PathVariable("id") UUID id,
             HttpServletRequest servletRequest
     ) {
         return ResponseEntity

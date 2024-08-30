@@ -83,9 +83,8 @@ public class User {
 
     @PreUpdate
     protected void onUpdate() {
-        if (this.deletedAt == null) {
+        if (this.deletedAt == null)
             this.updatedAt = LocalDateTime.now();
-        }
     }
 
     // updated_by
