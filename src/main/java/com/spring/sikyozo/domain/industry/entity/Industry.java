@@ -48,12 +48,6 @@ public class Industry {
     @OneToMany(mappedBy = "industry")
     private List<StoreIndustry> storeIndustries = new ArrayList<>();
 
-//    public Industry(String name, Store store,User user) {
-//        this.industryName = name;
-//        this.store = store;
-//    }
-
-
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
