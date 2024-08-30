@@ -34,6 +34,11 @@ public class WebSecurityConfig {
             "/api/users/**"
     };
 
+    private static final String[] STORE_API_URL = {
+            "/api/stores",
+            "/api/stores/**"
+    };
+
     private final LoginService loginService;
     private final JwtProvider jwtProvider;
     private final RedisDao redisDao;
@@ -51,6 +56,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/").permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers(USER_API_URL).permitAll()
+                        .requestMatchers(STORE_API_URL).permitAll()
                 )
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
