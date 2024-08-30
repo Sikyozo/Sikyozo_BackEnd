@@ -53,21 +53,21 @@ public class StoreController {
                 ));
     }
 
-//    // 가게 삭제
-//    @PutMapping("/delete/{storeId}")
-//    public ResponseEntity<ApiSuccessResponse<String>> deleteStore(
-//            @PathVariable UUID storeId,
-//            @RequestParam Long userId,
-//            HttpServletRequest servletRequest) {
-//        storeService.deleteStore(storeId, userId);
-//        return ResponseEntity
-//                .status(HttpStatus.OK)
-//                .body(ApiSuccessResponse.of(
-//                        HttpStatus.OK,
-//                        servletRequest.getServletPath(),
-//                        "삭제 완료 되었습니다."
-//                ));
-//    }
+    // 가게 삭제
+    @PutMapping("/delete/{storeId}")
+    public ResponseEntity<ApiSuccessResponse<String>> deleteStore(
+            @PathVariable UUID storeId,
+            @RequestParam Long userId,
+            HttpServletRequest servletRequest) {
+        storeService.deleteStore(storeId, userId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        servletRequest.getServletPath(),
+                        "삭제 완료 되었습니다."
+                ));
+    }
 
 //    // 가게 목록 조회 (검색)
 //    @GetMapping("/search")
