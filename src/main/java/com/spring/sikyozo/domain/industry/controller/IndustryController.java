@@ -1,10 +1,9 @@
-package com.spring.sikyozo.domain.user.controller;
+package com.spring.sikyozo.domain.industry.controller;
 
-import com.spring.sikyozo.domain.user.dto.request.SignUpRequestDto;
-import com.spring.sikyozo.domain.user.dto.request.UserInfoUpdateRequestDto;
+import com.spring.sikyozo.domain.industry.dto.request.IndustryRequestDto;
+import com.spring.sikyozo.domain.industry.dto.response.IndustryResponseDto;
+import com.spring.sikyozo.domain.industry.service.IndustryService;
 import com.spring.sikyozo.domain.user.dto.response.MessageResponseDto;
-import com.spring.sikyozo.domain.user.dto.response.UserResponseDto;
-import com.spring.sikyozo.domain.user.sevice.UserService;
 import com.spring.sikyozo.global.exception.dto.ApiSuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -18,45 +17,28 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/users")
-public class UserController {
-    private final UserService userService;
+@RequestMapping("/api/industries")
+public class IndustryController {
+    private final IndustryService industryService;
 
-    // 회원가입
-    @PostMapping("/signup")
-    public ResponseEntity<ApiSuccessResponse<MessageResponseDto>> signUp (
-            @Valid @RequestBody SignUpRequestDto dto,
+    // 업종 생성
+    @PostMapping()
+    public ResponseEntity<ApiSuccessResponse<IndustryResponseDto>> createIndustry (
+            @Valid @RequestBody IndustryRequestDto dto,
             HttpServletRequest servRequest
     ) {
-        log.info("회원가입 API 시작");
-
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servRequest.getServletPath(),
-                        userService.signUp(dto)
+                        industryService.createIndustry(dto)
                 ));
     }
 
-    // 사용자 정보 조회
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiSuccessResponse<UserResponseDto>> getUserInfo(
-            @PathVariable("id") Long id,
-            HttpServletRequest servletRequest
-    ) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiSuccessResponse.of(
-                        HttpStatus.OK,
-                        servletRequest.getServletPath(),
-                        userService.findUserInfo(id)
-                ));
-    }
-
-    // 사용자 정보 전체 조회 (MANAGER, MASTER)
-    @GetMapping()
-    public ResponseEntity<ApiSuccessResponse<Page<UserResponseDto>>> getAllUsers(
+    // 업종 전체 조회
+    @GetMapping
+    public ResponseEntity<ApiSuccessResponse<Page<IndustryResponseDto>>> getAllIndustries(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "") String search,
@@ -69,15 +51,15 @@ public class UserController {
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servletRequest.getServletPath(),
-                        userService.findAllUsers(page, size, search, sortBy, sortDirection)
+                        industryService.findAllIndustries(page, size, search, sortBy, sortDirection)
                 ));
     }
 
-    // 사용자 정보 수정
+    // 업종 수정
     @PutMapping("/{id}")
-    public ResponseEntity<ApiSuccessResponse<MessageResponseDto>> updateUserInfo(
+    public ResponseEntity<ApiSuccessResponse<IndustryResponseDto>> updateIndustry(
             @PathVariable("id") Long id,
-            @RequestBody UserInfoUpdateRequestDto dto,
+            @Valid @RequestBody IndustryRequestDto dto,
             HttpServletRequest servletRequest
     ) {
         return ResponseEntity
@@ -85,13 +67,13 @@ public class UserController {
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servletRequest.getServletPath(),
-                        userService.updateUserInfo(id, dto)
+                        industryService.updateIndustry(id, dto)
                 ));
     }
 
-    // 사용자 탈퇴 (Soft Delete)
+    // 업종 삭제 (Soft Delete)
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiSuccessResponse<MessageResponseDto>> deleteUser(
+    public ResponseEntity<ApiSuccessResponse<MessageResponseDto>> deleteIndustry(
             @PathVariable("id") Long id,
             HttpServletRequest servletRequest
     ) {
@@ -100,7 +82,7 @@ public class UserController {
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servletRequest.getServletPath(),
-                        userService.deleteUser(id)
+                        industryService.deleteIndustry(id)
                 ));
     }
 }
