@@ -13,12 +13,12 @@ public class CartItem implements Serializable {
 
     private String id;
     private String name;
-    private Integer quantity;
+    private int quantity;
     private Long price;
     private String image;
     private String storeId;
 
-    public static CartItem create(Menu menu, Integer quantity) {
+    public static CartItem create(Menu menu, int quantity) {
         CartItem cartItem = new CartItem();
         cartItem.id = menu.getId().toString();
         cartItem.name = menu.getMenuName();
