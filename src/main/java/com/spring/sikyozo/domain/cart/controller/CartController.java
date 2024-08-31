@@ -27,18 +27,33 @@ public class CartController {
 
     @PutMapping
     public ResponseEntity<ResponseDto<String>> addOrUpdateCartItem(@PathVariable @NotNull Long userId, @RequestBody AddOrUpdateCartItemRequestDto requestItemDto) {
+
+        /*
+         * jwt로 로그인한 사용자와 pathVariable의 userId가 맞는지 검증 로직 추가
+         */
+
         cartService.addOrUpdateCartItem(userId, requestItemDto.getMenuId(), requestItemDto.getQuantity());
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.success("장바구니 추가가 성공적으로 진행되었습니다."));
     }
 
     @GetMapping
     public ResponseEntity<ResponseDto<List<GetCartResponseDto>>> getCart(@PathVariable @NotNull Long userId) {
+
+        /*
+         * jwt로 로그인한 사용자와 pathVariable의 userId가 맞는지 검증 로직 추가
+         */
+
         return ResponseEntity.status(HttpStatus.OK).body(cartService.getCart(userId));
 
     }
 
     @DeleteMapping
     public ResponseEntity<ResponseDto<RemoveFromCartResponseDto>> removeFromCart(@PathVariable @NotNull Long userId, @RequestBody @Valid DeleteItemRequestDto deleteItemRequestDto) {
+
+        /*
+         * jwt로 로그인한 사용자와 pathVariable의 userId가 맞는지 검증 로직 추가
+         */
+
         UUID menuId = cartService.removeItemFromCart(userId, deleteItemRequestDto.getMenuId());
         RemoveFromCartResponseDto removeFromCartResponseDto = new RemoveFromCartResponseDto(menuId.toString());
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success("장바구니에서 메뉴가 제거되었습니다", removeFromCartResponseDto));
@@ -46,6 +61,11 @@ public class CartController {
 
     @DeleteMapping("/clear")
     public ResponseEntity<ResponseDto<String>> clearCart(@PathVariable @NotNull Long userId) {
+
+        /*
+         * jwt로 로그인한 사용자와 pathVariable의 userId가 맞는지 검증 로직 추가
+         */
+
         cartService.clearCart(userId);
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success("장바구니가 모두 삭제되었습니다."));
     }
