@@ -46,6 +46,7 @@ public class Menu {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private User createdBy;
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
