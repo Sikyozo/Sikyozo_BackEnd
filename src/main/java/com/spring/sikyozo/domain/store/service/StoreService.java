@@ -17,6 +17,7 @@ import com.spring.sikyozo.domain.storeindustry.entity.StoreIndustry;
 import com.spring.sikyozo.domain.storeindustry.repository.StoreIndustryRepository;
 import com.spring.sikyozo.domain.user.entity.User;
 import com.spring.sikyozo.domain.user.entity.UserRole;
+import com.spring.sikyozo.domain.user.exception.UserNotFoundException;
 import com.spring.sikyozo.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -38,14 +39,10 @@ public class StoreService {
     private final StoreIndustryRepository storeIndustryRepository;
 
     // 가게 생성
-    public StoreResponseDto createStore(CreateStoreRequestDto requestDto, Long id) {
-        User user = userRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 회원입니다.")
-        );
+    public StoreResponseDto createStore(CreateStoreRequestDto requestDto, Long userId) {
+        User user = isMember(userId);
 
-        if (!UserRole.OWNER.equals(user.getRole())) {
-            throw new StorePermissionException();
-        }
+        validateOwnerRole(user);
 
         Region region = regionRepository.findByRegionName(requestDto.getRegionName()).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않은 지역입니다.")
@@ -96,18 +93,20 @@ public class StoreService {
         return new StoreResponseDto(store);
     }
 
-    // 가게 수정
-    @Transactional
-    public UpdateStoreResponseDto updateStore(UUID storeId, Long id, UpdateStoreRequestDto requestDto) {
-
-        // 유저확인 & 가게주인 회원인지 확인
-        User user = userRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 회원입니다.")
-        );
-
-        if (!UserRole.OWNER.equals(user.getRole()) && !UserRole.MANAGER.equals(user.getRole())) {
+    // 사용자 권한 OWNER인지 확인
+    private void validateOwnerRole(User user) {
+        if (!UserRole.OWNER.equals(user.getRole())) {
             throw new StorePermissionException();
         }
+    }
+
+    // 가게 수정
+    @Transactional
+    public UpdateStoreResponseDto updateStore(UUID storeId, Long userId, UpdateStoreRequestDto requestDto) {
+
+        User user = isMember(userId);
+
+       validateCustomerOrManagerOrMasterRole(user);
 
         // 지역 확인
         Region region = regionRepository.findByRegionName(requestDto.getRegionName()).orElseThrow(
@@ -153,13 +152,9 @@ public class StoreService {
     @Transactional
     public void deleteStore(UUID storeId, Long userId) {
         // 유저확인 & 가게주인 회원인지 확인
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 회원입니다.")
-        );
+        User user = isMember(userId);
 
-        if (!UserRole.OWNER.equals(user.getRole()) && !UserRole.MANAGER.equals(user.getRole())) {
-            throw new StorePermissionException();
-        }
+       validateCustomerOrManagerOrMasterRole(user);
 
         // 가게 존재 여부 확인
         Store store = storeRepository.findById(storeId).orElseThrow(StoreNotFoundException::new);
@@ -179,14 +174,37 @@ public class StoreService {
     // 가게 목록 조회 (검색)
     @Transactional(readOnly = true)
     public SearchStoreResponseDto searchStores(Long userId, String menuName, String industryName, Pageable pageable) {
-        User user = userRepository.findById(userId).orElseThrow(StorePermissionException::new);
 
-        if (!UserRole.CUSTOMER.equals(user.getRole()) && !UserRole.MANAGER.equals(user.getRole()) ) {
-            throw new StorePermissionException();
-        }
+        User user = isMember(userId);
+
+        validateUserRoleForAccess(user);
 
         Page<Store> storeList = storeRepository.findByMenuNameAndIndustryName(menuName, industryName,pageable);
 
         return new  SearchStoreResponseDto(storeList);
     }
+
+    // 사용자가 고객, 매니저, 마스터 중 하나의 역할을 가지고 있는지 검증합니다.
+    private void validateUserRoleForAccess(User user) {
+        if (!UserRole.CUSTOMER.equals(user.getRole()) &&
+                !UserRole.MANAGER.equals(user.getRole()) &&
+                !UserRole.MASTER.equals(user.getRole())) {
+            throw new StorePermissionException();
+        }
+    }
+
+    // 사용자 확인
+    private User isMember(Long userId) {
+        return userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+    }
+
+    // 고객, 매니저, 마스터 권한 확인
+    private void validateCustomerOrManagerOrMasterRole(User user) {
+        if (!UserRole.CUSTOMER.equals(user.getRole()) &&
+                !UserRole.MANAGER.equals(user.getRole()) &&
+                !UserRole.MASTER.equals(user.getRole())) {
+            throw new StorePermissionException();
+        }
+    }
+
 }
