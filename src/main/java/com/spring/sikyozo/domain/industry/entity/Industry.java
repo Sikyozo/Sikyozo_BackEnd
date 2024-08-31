@@ -1,5 +1,6 @@
 package com.spring.sikyozo.domain.industry.entity;
 
+import com.spring.sikyozo.domain.storeindustry.entity.StoreIndustry;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
