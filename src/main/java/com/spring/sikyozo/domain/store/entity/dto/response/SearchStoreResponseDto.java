@@ -9,12 +9,11 @@ import java.util.stream.Collectors;
 
 @Getter
 public class SearchStoreResponseDto {
-
-    private List<String> storeName;
+    private List<StoreResponseDto> stores;
 
     public SearchStoreResponseDto(Page<Store> storeList) {
-        this.storeName = storeList.stream()
-                .map(Store::getStoreName)
+        this.stores = storeList.stream()
+                .map(StoreResponseDto::new)
                 .collect(Collectors.toList());
     }
 }
