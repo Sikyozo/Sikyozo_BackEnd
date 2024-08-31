@@ -17,7 +17,9 @@ public interface StoreRepository extends JpaRepository<Store, UUID> {
             "JOIN s.storeIndustries si " +
             "JOIN si.industry i " +
             "WHERE (:menuName IS NULL OR m.menuName LIKE %:menuName%) " +
-            "AND i.industryName LIKE %:industryName%")
+            "AND i.industryName LIKE %:industryName% " +
+            "AND s.deletedAt IS NULL " +
+            "ORDER BY s.updatedAt DESC")
     Page<Store> findByMenuNameAndIndustryName(@Param("menuName") String menuName,
                                               @Param("industryName") String industryName,
                                               Pageable pageable);
