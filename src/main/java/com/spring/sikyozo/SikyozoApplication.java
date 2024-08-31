@@ -4,11 +4,12 @@ import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication
 @EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
-public class
-SikyozoApplication {
+@SpringBootApplication
+@EnableScheduling
+public class SikyozoApplication {
 	public static void main(String[] args) {
 
 		// .env 파일에서 환경 변수 로드
