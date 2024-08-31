@@ -182,7 +182,7 @@ public class StoreService {
         User user = userRepository.findById(userId).orElseThrow(StorePermissionException::new);
 
         if (!UserRole.CUSTOMER.equals(user.getRole()) && !UserRole.MANAGER.equals(user.getRole()) ) {
-            throw new IllegalArgumentException("가게 검색 기능을 사용할 수 없습니다.");
+            throw new StorePermissionException();
         }
 
         Page<Store> storeList = storeRepository.findByMenuNameAndIndustryName(menuName, industryName,pageable);
