@@ -1,11 +1,8 @@
 package com.spring.sikyozo.domain.industry.entity;
 
-import com.spring.sikyozo.domain.store.entity.Store;
-import com.spring.sikyozo.domain.storeindustry.entity.StoreIndustry;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,11 +10,13 @@ import java.util.List;
 import java.util.UUID;
 
 @Getter
-@Entity
+@Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
-@Table(name="p_industry")
+@Entity
+@Table(name="p_industries")
 public class Industry {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -39,6 +38,7 @@ public class Industry {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by")
     private User updatedBy;
+
     private LocalDateTime deletedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -48,21 +48,39 @@ public class Industry {
     @OneToMany(mappedBy = "industry")
     private List<StoreIndustry> storeIndustries = new ArrayList<>();
 
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
     }
 
-    // 삭제된 업종 소프트 딜리트 처리
-    public void deleteIndustry(User user) {
+    @PreUpdate
+    protected void onUpdate() {
+        if (this.deletedAt == null)
+            this.updatedAt = LocalDateTime.now();
+    }
+
+    // created_by
+    public void createdBy(User verifiedUser) {
+        this.createdBy = verifiedUser;
+    }
+
+    // updated_by
+    public void updatedBy(User verifiedUser) {
+        this.updatedBy = verifiedUser;
+    }
+
+    // deleted_by
+    public void deletedBy(User verifiedUser) {
+        this.deletedBy = verifiedUser;
+    }
+
+    // 업종 업데이트
+    public void updateIndustry(String industryName) {
+        this.industryName = industryName;
+    }
+
+    // 업종 삭제
+    public void deleteIndustry() {
         this.deletedAt = LocalDateTime.now();
-        this.deletedBy = user;
     }
-
 }
