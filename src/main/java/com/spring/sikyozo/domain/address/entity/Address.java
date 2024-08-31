@@ -1,14 +1,9 @@
 package com.spring.sikyozo.domain.address.entity;
 
-import com.spring.sikyozo.domain.order.entity.Order;
-import com.spring.sikyozo.domain.payment.entity.Payment;
-import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -54,10 +49,8 @@ public class Address {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
-    //
 
-    @OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
-    private Order order;
 }
