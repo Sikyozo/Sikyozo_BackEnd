@@ -44,6 +44,11 @@ public class WebSecurityConfig {
             "/api/stores/**"
     };
 
+    private static final String[] MENU_API_URL = {
+            "/api/menus",
+            "/api/menus/**"
+    };
+
     private final LoginService loginService;
     private final JwtProvider jwtProvider;
     private final RedisDao redisDao;
@@ -62,6 +67,7 @@ public class WebSecurityConfig {
                         .requestMatchers(USER_API_URL).permitAll()
                         .requestMatchers(INDUSTRY_API_URL).permitAll()
                         .requestMatchers(STORE_API_URL).permitAll()
+                        .requestMatchers(MENU_API_URL).permitAll()
                 )
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
