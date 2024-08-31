@@ -7,12 +7,17 @@ import com.spring.sikyozo.domain.menu.entity.dto.response.CreateMenuResponseDto;
 import com.spring.sikyozo.domain.menu.entity.dto.response.GetMenusListResponseDto;
 import com.spring.sikyozo.domain.menu.entity.dto.response.GetMenusResponseDto;
 import com.spring.sikyozo.domain.menu.entity.dto.response.UpdateMenuResponseDto;
+import com.spring.sikyozo.domain.menu.exception.MenuDeletedException;
 import com.spring.sikyozo.domain.menu.exception.MenuHiddenException;
 import com.spring.sikyozo.domain.menu.repository.MenuRepository;
 import com.spring.sikyozo.domain.store.entity.Store;
+import com.spring.sikyozo.domain.store.exception.StoreNotFoundException;
+import com.spring.sikyozo.domain.store.exception.StorePermissionException;
 import com.spring.sikyozo.domain.store.repository.StoreRepository;
 import com.spring.sikyozo.domain.user.entity.User;
 import com.spring.sikyozo.domain.user.entity.UserRole;
+import com.spring.sikyozo.domain.user.exception.InvalidRoleException;
+import com.spring.sikyozo.domain.user.exception.UserNotFoundException;
 import com.spring.sikyozo.domain.user.repository.UserRepository;
 import com.spring.sikyozo.domain.menu.exception.MenuNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -36,19 +41,15 @@ public class MenuService {
     // 상품 생성
     public CreateMenuResponseDto createMenu(CreateMenuRequestDto requestDto, Long userId) {
         // 로그인 유저 확인
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 회원입니다.")
-        );
+        User user = getUser(userId);
 
         // 유저가 가게 주인 회원인지 확인
         if (!UserRole.OWNER.equals(user.getRole())) {
-            throw new IllegalArgumentException("가게 주인 회원이 아닙니다.");
+            throw new InvalidRoleException();
         }
 
         // 가게 유무 확인
-        Store store = storeRepository.findById(requestDto.getStoreId()).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 가게입니다")
-        );
+        Store store = storeRepository.findById(requestDto.getStoreId()).orElseThrow(StoreNotFoundException::new);
 
         Menu menu = new Menu();
         menu.createMenu(requestDto, user, store);
@@ -60,11 +61,11 @@ public class MenuService {
     // 상품 수정
     @Transactional
     public UpdateMenuResponseDto updateMenu(UpdateMenuRequestDto requestDto, UUID menusId, Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 회원입니다.")
-        );
+        User user = getUser(userId);
 
-        Menu menu = menuRepository.findById(menusId).orElseThrow(MenuNotFoundException::new);
+        validateCustomerOrManagerOrMasterRole(user);
+
+        Menu menu = getMenu(menusId);
 
         menu.updateMenu(requestDto, user);
 
@@ -75,11 +76,11 @@ public class MenuService {
     // 상품 삭제
     @Transactional
     public void deleteMenu(UUID menuId, Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 회원입니다.")
-        );
+        User user = getUser(userId);
 
-        Menu menu = menuRepository.findById(menuId).orElseThrow(MenuNotFoundException::new);
+        validateCustomerOrManagerOrMasterRole(user);
+
+        Menu menu = getMenu(menuId);
 
         menu.deleteMenu(user);
         menuRepository.save(menu);
@@ -89,11 +90,16 @@ public class MenuService {
     @Transactional
     public void hideMenu(UUID menuId, Long userId) {
 
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 회원입니다.")
-        );
+        User user = getUser(userId);
 
-        Menu menu = menuRepository.findById(menuId).orElseThrow(MenuNotFoundException::new);
+        validateCustomerOrManagerOrMasterRole(user);
+
+        Menu menu = getMenu(menuId);
+
+        // 상품이 삭제되어있는지 확인
+        if (menu.getDeletedAt() != null) {
+            throw new MenuDeletedException();
+        }
 
         menu.hideMenu(menu);
         menuRepository.save(menu);
@@ -102,11 +108,16 @@ public class MenuService {
     // 상품 숨김 해제
     @Transactional
     public void unHideMenu(UUID menuId, Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 회원입니다.")
-        );
+        User user = getUser(userId);
 
-        Menu menu = menuRepository.findById(menuId).orElseThrow(MenuNotFoundException::new);
+        validateCustomerOrManagerOrMasterRole(user);
+
+        Menu menu = getMenu(menuId);
+
+        // 상품이 삭제되어있는지 확인
+        if (menu.getDeletedAt() != null) {
+            throw new MenuDeletedException();
+        }
 
         menu.unHideMenu(menu);
         menuRepository.save(menu);
@@ -122,7 +133,7 @@ public class MenuService {
 
     // 상품 단일 조회
     public GetMenusResponseDto getMenuById(UUID menusId) {
-        Menu menu = menuRepository.findById(menusId).orElseThrow(MenuNotFoundException::new);
+        Menu menu = getMenu(menusId);
 
         // 상품 숨김 상태 확인
         if (menu.isHidden()) {
@@ -136,5 +147,24 @@ public class MenuService {
         Page<Menu> menuPage =
                 menuRepository.findByStore_StoreNameContainingAndMenuNameContainingAndHiddenFalse(storeName, menuName, pageable);
         return menuPage.map(GetMenusListResponseDto::new);
+    }
+
+    // 회원 여부 확인
+    private User getUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+    }
+
+    // 메뉴 여부 확인
+    private Menu getMenu(UUID menusId) {
+        return menuRepository.findById(menusId).orElseThrow(MenuNotFoundException::new);
+    }
+
+    // 사용자 권한 (OWNER, MANAGER, MASTER) 확인
+    private void validateCustomerOrManagerOrMasterRole(User user) {
+        if (!UserRole.OWNER.equals(user.getRole()) &&
+                !UserRole.MANAGER.equals(user.getRole()) &&
+                !UserRole.MASTER.equals(user.getRole())) {
+            throw new StorePermissionException();
+        }
     }
 }
