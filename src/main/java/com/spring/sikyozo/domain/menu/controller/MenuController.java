@@ -10,7 +10,9 @@ import com.spring.sikyozo.domain.menu.service.MenuService;
 import com.spring.sikyozo.global.exception.dto.ApiSuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -127,13 +129,22 @@ public class MenuController {
     public ResponseEntity<ApiSuccessResponse<Page<GetMenusListResponseDto>>> getMenuList(
             @RequestParam String menuName,
             @RequestParam String storeName,
-            @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
+            @RequestParam(required = false) Integer size,
+            @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        // 페이지 크기 제한: 10, 30, 50 이외의 값은 10으로 설정
+        int validatedSize = (size != null && (size == 10 || size == 30 || size == 50)) ? size : 10;
+
+        // 새로운 Pageable 객체 생성
+        Pageable validatedPageable = PageRequest.of(pageable.getPageNumber(), validatedSize, pageable.getSort());
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         "api/search?menuName=" + menuName + "&storeName=" + storeName,
-                        menuService.getMenuList(menuName, storeName,pageable)
+                        menuService.getMenuList(menuName, storeName, validatedPageable)
                 ));
     }
+
 }
