@@ -1,6 +1,8 @@
 package com.spring.sikyozo.domain.store.service;
 
 import com.spring.sikyozo.domain.industry.entity.Industry;
+import com.spring.sikyozo.domain.industry.exception.EmptyIndustryListException;
+import com.spring.sikyozo.domain.industry.exception.IndustryNotFoundException;
 import com.spring.sikyozo.domain.industry.repository.IndustryRepository;
 import com.spring.sikyozo.domain.region.entity.Region;
 import com.spring.sikyozo.domain.region.repository.RegionRepository;
@@ -50,13 +52,13 @@ public class StoreService {
 
         // 업종 데이터가 null이거나 비어 있는지 확인
         if (requestDto.getIndustryNames() == null || requestDto.getIndustryNames().isEmpty()) {
-            throw new IllegalArgumentException("업종 목록이 비어있습니다.");
+            throw new EmptyIndustryListException();
         }
 
         // 존재하는 업종인지 확인
         List<Industry> industryNames = industryRepository.findByIndustryNameIn(requestDto.getIndustryNames());
         if (industryNames.isEmpty()) {
-            throw new IllegalArgumentException("입력한 업종 이름들 중 존재하지 않는 업종이 있습니다.");
+            throw new IndustryNotFoundException();
         }
 
         // 존재하지 않는 업종 이름 필터링
@@ -65,7 +67,7 @@ public class StoreService {
                 .collect(Collectors.toList());
 
         if (!missingIndustries.isEmpty()) {
-            throw new IllegalArgumentException("다음 업종이 존재하지 않습니다: " + missingIndustries);
+            throw new IndustryNotFoundException();
         }
 
         // 가게 생성 및 저장
