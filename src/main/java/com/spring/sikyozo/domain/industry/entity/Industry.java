@@ -61,18 +61,18 @@ public class Industry {
     }
 
     // created_by
-    public void createdBy(User verifiedUser) {
-        this.createdBy = verifiedUser;
+    public void createdBy(User currentUser) {
+        this.createdBy = currentUser;
     }
 
     // updated_by
-    public void updatedBy(User verifiedUser) {
-        this.updatedBy = verifiedUser;
+    public void updatedBy(User currentUser) {
+        this.updatedBy = currentUser;
     }
 
     // deleted_by
-    public void deletedBy(User verifiedUser) {
-        this.deletedBy = verifiedUser;
+    public void deletedBy(User currentUser) {
+        this.deletedBy = currentUser;
     }
 
     // 업종 업데이트
