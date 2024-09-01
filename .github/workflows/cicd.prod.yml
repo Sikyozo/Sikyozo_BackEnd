@@ -23,6 +23,11 @@ jobs:
           echo "JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}" >> .env.dev
           echo "JWT_ACCESS_HEADER=${{ secrets.JWT_ACCESS_HEADER }}" >> .env.dev
           echo "JWT_REFRESH_HEADER=${{ secrets.JWT_REFRESH_HEADER }}" >> .env.dev
+          echo "SPRING_DATA_REDIS_HOST=${{ secrets.SPRING_DATA_REDIS_HOST }}" >> .env.dev
+          echo "SPRING_DATA_REDIS_PORT=${{ secrets.SPRING_DATA_REDIS_PORT }}" >> .env.dev
+          echo "SPRING_DATA_REDIS_USERNAME=${{ secrets.SPRING_DATA_REDIS_USERNAME }}" >> .env.dev
+          echo "SPRING_DATA_REDIS_PASSWORD=${{ secrets.SPRING_DATA_REDIS_PASSWORD }}" >> .env.dev
+          
 
       - name: Create .env.prod file
         run: |
@@ -34,8 +39,12 @@ jobs:
           echo "JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}" >> .env.prod
           echo "JWT_ACCESS_HEADER=${{ secrets.JWT_ACCESS_HEADER }}" >> .env.prod
           echo "JWT_REFRESH_HEADER=${{ secrets.JWT_REFRESH_HEADER }}" >> .env.prod
+                    echo "SPRING_DATA_REDIS_HOST=${{ secrets.SPRING_DATA_REDIS_HOST }}" >> .env.prod
+          echo "SPRING_DATA_REDIS_PORT=${{ secrets.SPRING_DATA_REDIS_PORT }}" >> .env.prod
+          echo "SPRING_DATA_REDIS_USERNAME=${{ secrets.SPRING_DATA_REDIS_USERNAME }}" >> .env.prod
+          echo "SPRING_DATA_REDIS_PASSWORD=${{ secrets.SPRING_DATA_REDIS_PASSWORD }}" >> .env.prod
 
-      # 프로젝트 파일 압축 파일로 변환
+      # Docker 로그인
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -58,6 +67,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
 
+      # 배포 시작
       - name: 🚀 Deploy to EC2 with CodeDeploy
         run: |
           aws deploy create-deployment \
