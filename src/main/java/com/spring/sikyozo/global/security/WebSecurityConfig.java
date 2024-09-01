@@ -49,6 +49,21 @@ public class WebSecurityConfig {
             "/api/menus/**"
     };
 
+    private static final String[] PAYMENT_API_URL = {
+            "/api/payments",
+            "/api/payments/**"
+    };
+
+    private static final String[] ORDER_API_URL = {
+            "/api/orders",
+            "/api/orders/**"
+    };
+
+    private static final String[] CART_API_URL = {
+            "/api/carts",
+            "/api/carts/**"
+    };
+
     private static final String[] REGION_API_URL = {
             "/api/regions",
             "/api/regions/**"
@@ -73,6 +88,9 @@ public class WebSecurityConfig {
                         .requestMatchers(INDUSTRY_API_URL).permitAll()
                         .requestMatchers(STORE_API_URL).permitAll()
                         .requestMatchers(MENU_API_URL).permitAll()
+                        .requestMatchers(PAYMENT_API_URL).authenticated()
+                        .requestMatchers(ORDER_API_URL).authenticated()
+                        .requestMatchers(CART_API_URL).authenticated()
                         .requestMatchers(REGION_API_URL).permitAll()
                 )
                 .sessionManagement(sessionManagement -> sessionManagement
