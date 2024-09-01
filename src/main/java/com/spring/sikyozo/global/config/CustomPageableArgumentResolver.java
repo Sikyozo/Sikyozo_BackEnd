@@ -9,6 +9,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import java.util.List;
 
 
 @Component
@@ -39,7 +40,16 @@ public class CustomPageableArgumentResolver implements HandlerMethodArgumentReso
 
     private int getSize(NativeWebRequest webRequest) {
         String size = webRequest.getParameter("size");
-        return (size != null) ? Integer.parseInt(size) : 10;
+
+        if (size == null) {
+            return 10;
+        }
+
+        if (List.of(10, 30, 50).contains(Integer.parseInt(size))) {
+            return Integer.parseInt(size);
+        }
+
+        return 10;
     }
 
     private Sort getSort(NativeWebRequest webRequest) {
