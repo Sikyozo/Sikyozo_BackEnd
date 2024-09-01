@@ -56,8 +56,5 @@ public class Address {
         this.createdAt = LocalDateTime.now();
     }
 
-    //
 
-    @OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
-    private Order order;
 }

@@ -116,4 +116,23 @@ public class User {
     public void deleteUser() {
         this.deletedAt = LocalDateTime.now();
     }
+
+    public void addPayment(Payment payment) {
+        if (!this.payments.contains(payment)) {
+            this.payments.add(payment);
+            payment.addUser(this);
+        }
+    }
+
+    public void removePayment(Payment payment) {
+        if (this.payments.contains(payment)) {
+            this.payments.remove(payment);
+        }
+    }
+
+    public void deleteOrder(Order order) {
+        if (this.orders.contains(order)) {
+            this.orders.remove(order);
+        }
+    }
 }
