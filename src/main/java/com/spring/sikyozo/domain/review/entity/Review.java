@@ -1,10 +1,8 @@
 package com.spring.sikyozo.domain.review.entity;
 
 import com.spring.sikyozo.domain.cs.entity.Cs;
-import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

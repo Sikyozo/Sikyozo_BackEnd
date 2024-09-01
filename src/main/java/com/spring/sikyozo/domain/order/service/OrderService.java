@@ -48,7 +48,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.spring.sikyozo.domain.order.entity.QOrder.order;
-import static com.spring.sikyozo.domain.payment.entity.QPayment.payment;
 
 @Service
 @RequiredArgsConstructor

@@ -1,7 +1,10 @@
 package com.spring.sikyozo.domain.cart.entity;
 
 import com.spring.sikyozo.domain.menu.entity.Menu;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 

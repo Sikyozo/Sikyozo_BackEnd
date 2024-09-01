@@ -35,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-import static com.spring.sikyozo.domain.order.entity.QOrder.order;
 import static com.spring.sikyozo.domain.payment.entity.QPayment.payment;
 
 @Service

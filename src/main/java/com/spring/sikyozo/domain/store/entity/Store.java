@@ -1,8 +1,8 @@
 package com.spring.sikyozo.domain.store.entity;
 
 import com.spring.sikyozo.domain.industry.entity.Industry;
-import com.spring.sikyozo.domain.order.entity.Order;
 import com.spring.sikyozo.domain.menu.entity.Menu;
+import com.spring.sikyozo.domain.order.entity.Order;
 import com.spring.sikyozo.domain.payment.entity.Payment;
 import com.spring.sikyozo.domain.region.entity.Region;
 import com.spring.sikyozo.domain.store.entity.dto.request.CreateStoreRequestDto;
