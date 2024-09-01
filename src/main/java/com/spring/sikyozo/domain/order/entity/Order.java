@@ -1,7 +1,7 @@
 package com.spring.sikyozo.domain.order.entity;
 
 import com.spring.sikyozo.domain.address.entity.Address;
-import com.spring.sikyozo.domain.order.exception.OrderCannotChangeStatusException;
+import com.spring.sikyozo.domain.order.exception.*;
 import com.spring.sikyozo.domain.ordermenu.entity.OrderMenu;
 import com.spring.sikyozo.domain.payment.entity.Payment;
 import com.spring.sikyozo.domain.store.entity.Store;
@@ -167,14 +167,14 @@ public class Order {
             status = OrderStatus.ACCEPTED;
             acceptedAt = LocalDateTime.now();
         } else {
-            throw new OrderCannotChangeStatusException("주문을 수락할 수 없습니다.");
+            throw new OrderCannotBeAcceptedException();
         }
     }
 
     // 주문 거절
     public void rejectOrder(User loginUser) {
         if (!status.equals(OrderStatus.PENDING) || !orderPaymentStatus.equals(OrderPaymentStatus.COMPLETE)) {
-            throw new OrderCannotChangeStatusException("대기 중이거나 완료된 주문은 거절할 수 없습니다.");
+            throw new OrderCannotBeRejectedException();
         }
         status = OrderStatus.REJECTED;
         rejectedAt = LocalDateTime.now();
@@ -186,15 +186,15 @@ public class Order {
     public void cancelOrder(User loginUser) {
 
         if (status.equals(OrderStatus.COMPLETE)) {
-            throw new OrderCannotChangeStatusException("이미 배송이 완료된 주문은 취소할 수 없습니다.");
+            throw new OrderAlreadyCompletedException();
         }
 
         if (status.equals(OrderStatus.REJECTED)) {
-            throw new OrderCannotChangeStatusException("이미 거절된 주문입니다.");
+            throw new OrderAlreadyRejectedException();
         }
 
         if (status.equals(OrderStatus.CANCELED)) {
-            throw new OrderCannotChangeStatusException("이미 취소된 주문입니다.");
+            throw new OrderAlreadyCanceledException();
         }
 
         status = OrderStatus.CANCELED;
@@ -215,7 +215,7 @@ public class Order {
 
     public void completeOrder() {
         if (!status.equals(OrderStatus.ACCEPTED)) {
-            throw new OrderCannotChangeStatusException("주문 수락 상태에서만 완료가 가능합니다.");
+            throw new OrderCannotBeCompletedException();
         }
         status = OrderStatus.COMPLETE;
         completedAt = LocalDateTime.now();
@@ -223,21 +223,15 @@ public class Order {
 
     public void delete(User loginUser) {
         if (deletedBy != null) {
-            throw new OrderCannotChangeStatusException("이미 삭제된 주문입니다.");
+            throw new OrderAlreadyDeletedException();
         }
 
         if (status.equals(OrderStatus.ACCEPTED)) {
-            throw new OrderCannotChangeStatusException("조리 중인 주문은 삭제할 수 없습니다.");
+            throw new AcceptedOrderCannotBeDeletedException();
         }
 
         deletedAt = LocalDateTime.now();
         deletedBy = loginUser;
     }
 
-
-//    public void delete(OrderOrderRepository orderRepository) {
-//        this.user.removeOrder(this);
-//        this.store.removeOrder(this);
-//        orderRepository.delete(this);
-//    }
 }

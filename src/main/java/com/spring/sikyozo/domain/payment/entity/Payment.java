@@ -1,19 +1,13 @@
 package com.spring.sikyozo.domain.payment.entity;
 
 import com.spring.sikyozo.domain.order.entity.Order;
-import com.spring.sikyozo.domain.payment.exception.CannotCreatePaymentException;
-import com.spring.sikyozo.domain.payment.exception.PaymentException;
+import com.spring.sikyozo.domain.payment.exception.*;
 import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.user.entity.User;
-import com.spring.sikyozo.domain.user.entity.UserRole;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Getter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -102,7 +96,7 @@ public class Payment {
 
     public static Payment create(User user, Order order , Long price) {
         if (!price.equals(order.getTotalPrice())) {
-            throw new CannotCreatePaymentException("주문 금액과 결제 금액이 일치하지 않습니다.");
+            throw new PaymentAmoutMismatchException();
         }
 
         Payment payment = new Payment();
@@ -117,15 +111,15 @@ public class Payment {
 
     public void processPayment(PaymentType type, Long price) {
         if (status.equals(PaymentStatus.COMPLETED)) {
-            throw new PaymentException("이미 처리된 결제입니다.");
+            throw new PaymentAlreadyCompletedException();
         }
 
         if (status.equals(PaymentStatus.FAILED)) {
-            throw new PaymentException("이미 실패한 결제입니다.");
+            throw new PaymentAlreadyFailedException();
         }
 
         if (!this.price.equals(price)) {
-            throw new PaymentException("결제 금액이 일치하지 않습니다.");
+            throw new PaymentAmoutMismatchException();
         }
 
         // 결제 로직 추가
@@ -137,7 +131,7 @@ public class Payment {
 
     public void cancel(User loginUser) {
         if (status.equals(PaymentStatus.CANCELED)) {
-            throw new PaymentException("이미 취소된 결제입니다.");
+            throw new PaymentAlreadyCanceledException();
         }
         status = PaymentStatus.CANCELED;
         canceledBy = loginUser;
@@ -148,7 +142,7 @@ public class Payment {
 
     public void delete(User loginUser) {
         if (deletedBy != null) {
-            throw new PaymentException("이미 삭제된 결제 정보입니다.");
+            throw new PaymentAlreadyDeletedException();
         }
 
         deletedBy = loginUser;
