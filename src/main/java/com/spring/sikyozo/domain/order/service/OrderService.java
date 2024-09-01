@@ -142,7 +142,7 @@ public class OrderService {
     }
 
     private User findUserById(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("존재하지 않는 사용자입니다"));
+        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException());
     }
 
     private Address findAddressById(UUID addressId) {
@@ -163,7 +163,7 @@ public class OrderService {
     }
 
     private Menu findMenuByCartItem(CartItem cartItem) {
-        return menuRepository.findById(UUID.fromString(cartItem.getId())).orElseThrow(() -> new MenuNotFoundException("존재하지 않는 메뉴입니다."));
+        return menuRepository.findById(UUID.fromString(cartItem.getId())).orElseThrow(() -> new MenuNotFoundException());
 
     }
 
@@ -423,7 +423,7 @@ public class OrderService {
     }
 
     private Store findStoreById(UUID storeId) {
-        return storeRepository.findById(storeId).orElseThrow(() -> new StoreNotFoundException("존재하지 않는 가게입니다."));
+        return storeRepository.findById(storeId).orElseThrow(() -> new StoreNotFoundException());
     }
 
 
