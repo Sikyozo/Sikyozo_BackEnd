@@ -1,7 +1,10 @@
 package com.spring.sikyozo.domain.address.exception;
 
-public class AddressNotFoundException extends RuntimeException{
-    public AddressNotFoundException(String message) {
-        super(message);
+import com.spring.sikyozo.global.exception.SikyozoException;
+import com.spring.sikyozo.global.exception.domainErrorCode.AddressErrorCode;
+
+public class AddressNotFoundException extends SikyozoException {
+    public AddressNotFoundException() {
+        super(AddressErrorCode.ADDRESS_NOT_FOUND);
     }
 }
