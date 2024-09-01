@@ -6,7 +6,7 @@ import com.spring.sikyozo.domain.industry.entity.Industry;
 import com.spring.sikyozo.domain.industry.exception.DuplicateIndustryNameException;
 import com.spring.sikyozo.domain.industry.exception.IndustryNotFoundException;
 import com.spring.sikyozo.domain.industry.repository.IndustryRepository;
-import com.spring.sikyozo.domain.user.dto.response.MessageResponseDto;
+import com.spring.sikyozo.domain.industry.dto.response.MessageResponseDto;
 import com.spring.sikyozo.domain.user.entity.User;
 import com.spring.sikyozo.domain.user.entity.UserRole;
 import com.spring.sikyozo.domain.user.exception.AccessDeniedException;
@@ -127,7 +127,7 @@ public class IndustryService {
 
     // 업종 중복 확인
     private void checkIndustryDuplicatioin(String industryName) {
-        Optional<Industry> checkIndustryName = industryRepository.findByIndustryName(industryName);
+        Optional<Industry> checkIndustryName = industryRepository.findByIndustryNameAndDeletedAtIsNull(industryName);
         if (checkIndustryName.isPresent())
             throw new DuplicateIndustryNameException();
     }
