@@ -1,14 +1,12 @@
 package com.spring.sikyozo.domain.region.service;
 
-import com.spring.sikyozo.domain.industry.entity.Industry;
-import com.spring.sikyozo.domain.industry.exception.IndustryNotFoundException;
 import com.spring.sikyozo.domain.region.dto.request.RegionRequestDto;
 import com.spring.sikyozo.domain.region.dto.response.RegionResponseDto;
 import com.spring.sikyozo.domain.region.entity.Region;
 import com.spring.sikyozo.domain.region.exception.DuplicateRegionNameException;
 import com.spring.sikyozo.domain.region.exception.RegionNotFoundException;
 import com.spring.sikyozo.domain.region.repository.RegionRepository;
-import com.spring.sikyozo.domain.user.dto.response.MessageResponseDto;
+import com.spring.sikyozo.domain.region.dto.response.MessageResponseDto;
 import com.spring.sikyozo.domain.user.entity.User;
 import com.spring.sikyozo.domain.user.entity.UserRole;
 import com.spring.sikyozo.domain.user.exception.AccessDeniedException;

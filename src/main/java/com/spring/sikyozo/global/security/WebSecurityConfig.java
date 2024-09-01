@@ -64,6 +64,11 @@ public class WebSecurityConfig {
             "/api/carts/**"
     };
 
+    private static final String[] ADDRESS_API_URL = {
+            "/api/addresses",
+            "/api/addresses/**"
+    };
+
     private static final String[] REGION_API_URL = {
             "/api/regions",
             "/api/regions/**"
@@ -91,6 +96,7 @@ public class WebSecurityConfig {
                         .requestMatchers(PAYMENT_API_URL).authenticated()
                         .requestMatchers(ORDER_API_URL).authenticated()
                         .requestMatchers(CART_API_URL).authenticated()
+                        .requestMatchers(ADDRESS_API_URL).permitAll()
                         .requestMatchers(REGION_API_URL).permitAll()
                 )
                 .sessionManagement(sessionManagement -> sessionManagement

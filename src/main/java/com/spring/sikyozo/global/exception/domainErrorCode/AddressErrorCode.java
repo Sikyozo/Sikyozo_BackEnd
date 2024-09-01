@@ -6,10 +6,8 @@ import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 public enum AddressErrorCode implements ErrorCode {
-
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 배송지를 찾을 수 없습니다."),
-
-    ;
+    DUPLICATE_ADDRESS_NAME(HttpStatus.CONFLICT, "중복된 배송지가 존재합니다.");
 
     private final HttpStatus status;
     private final String message;
