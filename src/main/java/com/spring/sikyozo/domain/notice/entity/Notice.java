@@ -1,15 +1,9 @@
 package com.spring.sikyozo.domain.notice.entity;
 
-import com.spring.sikyozo.domain.address.entity.Address;
-import com.spring.sikyozo.domain.order.entity.Order;
-import com.spring.sikyozo.domain.payment.entity.Payment;
-import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity

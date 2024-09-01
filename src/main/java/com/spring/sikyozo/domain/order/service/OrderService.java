@@ -292,7 +292,7 @@ public class OrderService {
                         typeEq(type),
                         statusEq(status),
                         orderPaymentStatusEq(orderPaymentStatus),
-                        showEq(show)
+                        showEq(show, loginUser)
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -308,7 +308,7 @@ public class OrderService {
                         typeEq(type),
                         statusEq(status),
                         orderPaymentStatusEq(orderPaymentStatus),
-                        showEq(show)
+                        showEq(show, loginUser)
                 );
 
         Page<Order> page = PageableExecutionUtils.getPage(orders, pageable, countQuery::fetchOne);
@@ -387,16 +387,29 @@ public class OrderService {
         return (orderPaymentStatus != null) ? (order.orderPaymentStatus.eq(orderPaymentStatus)) : null;
     }
 
-    private  BooleanExpression showEq(String hide) {
-        if (hide == "all") {
+    private  BooleanExpression showEq(String show, User loginUser) {
+        // Customer or Owner
+        if (isOwner(loginUser) || isCustomer(loginUser)) {
+            return order.deletedBy.isNull()
+                    .or(order.deletedBy.ne(loginUser)
+                            .and(order.deletedBy.role.ne(UserRole.MASTER)
+                                    .and(order.deletedBy.role.ne(UserRole.MANAGER))));
+        }
+
+        // 관리자만
+        if (show == "all") {
             return null;
         }
 
-        if (hide == "deleted") {
+        // 관리자만
+        if (show == "deleted") {
             return order.deletedAt.isNotNull();
         }
+
+        //
         return order.deletedAt.isNull();
     }
+
 
 
     private void verifyHasPermissionToGetUserOrders(Long userId, UUID storeId, User loginUser) {

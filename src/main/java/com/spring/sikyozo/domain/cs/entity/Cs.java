@@ -3,8 +3,6 @@ package com.spring.sikyozo.domain.cs.entity;
 import com.spring.sikyozo.domain.review.entity.Review;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

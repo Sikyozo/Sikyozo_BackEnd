@@ -2,20 +2,14 @@ package com.spring.sikyozo.domain.menu.entity;
 
 import com.spring.sikyozo.domain.menu.entity.dto.request.CreateMenuRequestDto;
 import com.spring.sikyozo.domain.menu.entity.dto.request.UpdateMenuRequestDto;
-import com.spring.sikyozo.domain.ordermenu.entity.OrderMenu;
-import com.spring.sikyozo.domain.menu.dto.request.RequestDto;
-import com.spring.sikyozo.domain.ordermenu.entity.OrderMenu;
 import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity

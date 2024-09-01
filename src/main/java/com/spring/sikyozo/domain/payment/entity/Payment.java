@@ -1,6 +1,7 @@
 package com.spring.sikyozo.domain.payment.entity;
 
 import com.spring.sikyozo.domain.order.entity.Order;
+import com.spring.sikyozo.domain.order.entity.OrderPaymentStatus;
 import com.spring.sikyozo.domain.payment.exception.*;
 import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.user.entity.User;
@@ -99,6 +100,10 @@ public class Payment {
             throw new PaymentAmoutMismatchException();
         }
 
+        if (order.getOrderPaymentStatus() != OrderPaymentStatus.PENDING) {
+            throw new PaymentAlreadyExistsException();
+        }
+
         Payment payment = new Payment();
         payment.addUser(user);
         payment.addStore(order.getStore());
@@ -116,6 +121,10 @@ public class Payment {
 
         if (status.equals(PaymentStatus.FAILED)) {
             throw new PaymentAlreadyFailedException();
+        }
+
+        if (status.equals(PaymentStatus.CANCELED)) {
+            throw new PaymentAlreadyCanceledException();
         }
 
         if (!this.price.equals(price)) {

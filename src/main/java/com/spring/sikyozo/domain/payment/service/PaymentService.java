@@ -185,7 +185,7 @@ public class PaymentService {
                         storeEq(storeId),
                         typeEq(type),
                         statusEq(status),
-                        showEq(show)
+                        showEq(show, loginUser)
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -200,7 +200,7 @@ public class PaymentService {
                         storeEq(storeId),
                         typeEq(type),
                         statusEq(status),
-                        showEq(show)
+                        showEq(show, loginUser)
                 );
 
         Page<Payment> page = PageableExecutionUtils.getPage(payments, pageable, countQuery::fetchOne);
@@ -238,14 +238,30 @@ public class PaymentService {
         return (type != null) ? (payment.type.eq(type)) : null;
     }
 
-    private  BooleanExpression showEq(String hide) {
-        if (hide == "all") {
+    // all : 삭제, 미삭제 모두 조회
+    // deleted : 삭제 된 것만
+    // null : 미삭제만 조회
+    private  BooleanExpression showEq(String show, User loginUser) {
+
+        // Customer or Owner
+        if (isOwner(loginUser) || isCustomer(loginUser)) {
+            return payment.deletedBy.isNull()
+                    .or(payment.deletedBy.ne(loginUser)
+                    .and(payment.deletedBy.role.ne(UserRole.MASTER)
+                    .and(payment.deletedBy.role.ne(UserRole.MANAGER))));
+        }
+
+        // 관리자만
+        if (show == "all") {
             return null;
         }
 
-        if (hide == "deleted") {
+        // 관리자만
+        if (show == "deleted") {
             return payment.deletedAt.isNotNull();
         }
+
+        //
         return payment.deletedAt.isNull();
     }
 

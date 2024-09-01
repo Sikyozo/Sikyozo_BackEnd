@@ -7,7 +7,6 @@ import com.spring.sikyozo.domain.store.entity.dto.response.UpdateStoreResponseDt
 import com.spring.sikyozo.domain.store.service.StoreService;
 import com.spring.sikyozo.global.exception.dto.ApiSuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

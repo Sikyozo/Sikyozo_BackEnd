@@ -1,8 +1,6 @@
 package com.spring.sikyozo.domain.store.entity.dto.response;
 
-import com.spring.sikyozo.domain.industry.entity.Industry;
 import com.spring.sikyozo.domain.store.entity.Store;
-import com.spring.sikyozo.domain.storeindustry.entity.StoreIndustry;
 import lombok.Getter;
 
 import java.util.List;

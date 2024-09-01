@@ -2,7 +2,6 @@ package com.spring.sikyozo.domain.cart.service;
 
 import com.spring.sikyozo.domain.cart.dto.response.GetCartResponseDto;
 import com.spring.sikyozo.domain.cart.dto.response.RemoveFromCartResponseDto;
-import com.spring.sikyozo.global.dto.ResponseDto;
 
 import java.util.List;
 import java.util.UUID;
