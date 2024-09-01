@@ -233,4 +233,11 @@ public class Order {
         deletedAt = LocalDateTime.now();
         deletedBy = loginUser;
     }
+
+
+//    public void delete(OrderOrderRepository orderRepository) {
+//        this.user.removeOrder(this);
+//        this.store.removeOrder(this);
+//        orderRepository.delete(this);
+//    }
 }

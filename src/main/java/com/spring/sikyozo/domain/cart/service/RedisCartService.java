@@ -2,13 +2,15 @@ package com.spring.sikyozo.domain.cart.service;
 
 import com.spring.sikyozo.domain.cart.dto.response.GetCartResponseDto;
 import com.spring.sikyozo.domain.cart.entity.CartItem;
-import com.spring.sikyozo.domain.cart.exception.CartItemCannotAddedOrUpdatedException;
+import com.spring.sikyozo.domain.cart.exception.CartItemCannotAddedOrUpdated;
 import com.spring.sikyozo.domain.cart.exception.DifferentStoreException;
+import com.spring.sikyozo.domain.menu.exception.MenuNotFoundException;
 import com.spring.sikyozo.domain.cart.repository.CartRepository;
 import com.spring.sikyozo.domain.menu.entity.Menu;
-import com.spring.sikyozo.domain.menu.exception.MenuNotFoundException;
 import com.spring.sikyozo.domain.menu.repository.MenuRepositoryImpl;
 import com.spring.sikyozo.domain.store.entity.Store;
+import com.spring.sikyozo.domain.store.exception.StoreNotFoundException;
+import com.spring.sikyozo.domain.store.repository.StoreRepository;
 import com.spring.sikyozo.domain.user.entity.User;
 import com.spring.sikyozo.domain.user.entity.UserRole;
 import com.spring.sikyozo.domain.user.exception.UserNotFoundException;
@@ -76,12 +78,12 @@ public class RedisCartService implements CartService {
 
     private void checkUserRoleForCart(User user) {
         if (user.getRole().equals(UserRole.MASTER) || user.getRole().equals(UserRole.MANAGER)) {
-            throw new CartItemCannotAddedOrUpdatedException("장바구니 권한이 없습니다.");
+            throw new CartItemCannotAddedOrUpdated("장바구니 권한이 없습니다.");
         }
     }
     private void checkOwnerStore(User user, Store store) {
         if (user.getRole().equals(UserRole.OWNER) && !user.getStores().contains(store)) {
-            throw new CartItemCannotAddedOrUpdatedException("본인의 가게 상품만 담을 수 있습니다.");
+            throw new CartItemCannotAddedOrUpdated("본인의 가게 상품만 담을 수 있습니다.");
         }
     }
 

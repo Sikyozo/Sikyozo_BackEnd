@@ -3,6 +3,8 @@ package com.spring.sikyozo.domain.menu.entity;
 import com.spring.sikyozo.domain.menu.entity.dto.request.CreateMenuRequestDto;
 import com.spring.sikyozo.domain.menu.entity.dto.request.UpdateMenuRequestDto;
 import com.spring.sikyozo.domain.ordermenu.entity.OrderMenu;
+import com.spring.sikyozo.domain.menu.dto.request.RequestDto;
+import com.spring.sikyozo.domain.ordermenu.entity.OrderMenu;
 import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -61,12 +63,6 @@ public class Menu {
 
     // 숨김 처리
     private boolean hidden = false;
-
-    @OneToMany(mappedBy = "menu")
-    private List<OrderMenu> orderMenus = new ArrayList<>();
-
-    @OneToMany(mappedBy = "menu")
-    private List<Store> stores = new ArrayList<>();
 
     @PreUpdate
     protected void onUpdate() {

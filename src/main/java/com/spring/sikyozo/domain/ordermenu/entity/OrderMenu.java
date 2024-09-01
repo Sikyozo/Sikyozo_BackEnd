@@ -3,8 +3,8 @@ package com.spring.sikyozo.domain.ordermenu.entity;
 import com.spring.sikyozo.domain.menu.entity.Menu;
 import com.spring.sikyozo.domain.order.entity.Order;
 import jakarta.persistence.*;
+import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -26,22 +26,6 @@ public class OrderMenu {
     private int quantity;
     @Column(nullable = false)
     private Long price;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    private void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        createdAt = now;
-        updatedAt = now;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 
     public void addOrder(Order order) {
         if (this.order!=order) {

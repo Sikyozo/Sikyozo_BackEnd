@@ -5,10 +5,15 @@ import com.spring.sikyozo.domain.payment.exception.CannotCreatePaymentException;
 import com.spring.sikyozo.domain.payment.exception.PaymentException;
 import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.user.entity.User;
+import com.spring.sikyozo.domain.user.entity.UserRole;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
