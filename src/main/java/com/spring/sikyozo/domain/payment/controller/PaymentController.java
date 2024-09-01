@@ -9,6 +9,7 @@ import com.spring.sikyozo.domain.payment.entity.PaymentStatus;
 import com.spring.sikyozo.domain.payment.entity.PaymentType;
 import com.spring.sikyozo.domain.payment.service.PaymentService;
 import com.spring.sikyozo.global.exception.dto.ApiSuccessResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +31,7 @@ public class PaymentController {
      */
 
     @PostMapping
-    public ResponseEntity<ApiSuccessResponse<CreatePaymentRseponseDto>> createPayment(@RequestBody CreatePaymentRequestDto createPaymentRequestDto) {
+    public ResponseEntity<ApiSuccessResponse<CreatePaymentRseponseDto>> createPayment(@RequestBody @Valid CreatePaymentRequestDto createPaymentRequestDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiSuccessResponse.of(
@@ -45,7 +46,7 @@ public class PaymentController {
      */
 
     @PatchMapping
-    public ResponseEntity<ApiSuccessResponse<ProcessPaymentResponseDto>> processPayment(@RequestBody ProcessPaymentRequestDto processPaymentRequestDto) {
+    public ResponseEntity<ApiSuccessResponse<ProcessPaymentResponseDto>> processPayment(@RequestBody @Valid ProcessPaymentRequestDto processPaymentRequestDto) {
         ProcessPaymentResponseDto processPaymentResponse = paymentService.processPayment(processPaymentRequestDto.getPaymentId(), processPaymentRequestDto.getPaymentType(), processPaymentRequestDto.getPrice());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -85,7 +86,7 @@ public class PaymentController {
      */
 
     @DeleteMapping
-    public ResponseEntity<ApiSuccessResponse<CancelPaymentResponseDto>> cancelPayment(@RequestBody CancelPaymentRequestDto cancelPaymentRequestDto) {
+    public ResponseEntity<ApiSuccessResponse<CancelPaymentResponseDto>> cancelPayment(@RequestBody @Valid CancelPaymentRequestDto cancelPaymentRequestDto) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
@@ -100,7 +101,7 @@ public class PaymentController {
      */
 
     @DeleteMapping("/delete")
-    public ResponseEntity<ApiSuccessResponse<DeletePaymentResponseDto>> deletePayment(@RequestBody DeletePaymentRequestDto deletePaymentRequestDto) {
+    public ResponseEntity<ApiSuccessResponse<DeletePaymentResponseDto>> deletePayment(@RequestBody @Valid DeletePaymentRequestDto deletePaymentRequestDto) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(

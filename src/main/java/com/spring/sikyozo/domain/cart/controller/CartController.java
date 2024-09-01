@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/carts")
 @RequiredArgsConstructor
@@ -24,7 +23,7 @@ public class CartController {
     private final CartService cartService;
 
     @PutMapping
-    public ResponseEntity<ApiSuccessResponse<Void>> addOrUpdateCartItem(@RequestBody AddOrUpdateCartItemRequestDto requestItemDto) {
+    public ResponseEntity<ApiSuccessResponse<Void>> addOrUpdateCartItem(@RequestBody @Valid AddOrUpdateCartItemRequestDto requestItemDto) {
         cartService.addOrUpdateCartItem(requestItemDto.getMenuId(), requestItemDto.getQuantity());
         return ResponseEntity
                 .status(HttpStatus.CREATED)

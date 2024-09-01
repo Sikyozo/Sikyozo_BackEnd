@@ -7,6 +7,7 @@ import com.spring.sikyozo.domain.order.entity.OrderStatus;
 import com.spring.sikyozo.domain.order.entity.OrderType;
 import com.spring.sikyozo.domain.order.service.OrderService;
 import com.spring.sikyozo.global.exception.dto.ApiSuccessResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +28,7 @@ public class OrderController {
      * 비대면 주문
      */
     @PostMapping("/online")
-    public ResponseEntity<ApiSuccessResponse<CreateOrderResponseDto>> createOrderByOnline(@RequestBody CreateOrderByOnlineRequestDto onlineRequestDto) {
+    public ResponseEntity<ApiSuccessResponse<CreateOrderResponseDto>> createOrderByOnline(@RequestBody @Valid CreateOrderByOnlineRequestDto onlineRequestDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiSuccessResponse.of(
