@@ -8,6 +8,5 @@ import java.util.UUID;
 @Getter
 @Setter
 public class CancelPaymentRequestDto {
-    private Long userId;
     private UUID paymentId;
 }

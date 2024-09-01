@@ -10,7 +10,6 @@ import java.util.UUID;
 @Setter
 public class ProcessPaymentRequestDto {
 
-    private Long userId;
     private UUID paymentId;
     private PaymentType paymentType;
     private Long price;

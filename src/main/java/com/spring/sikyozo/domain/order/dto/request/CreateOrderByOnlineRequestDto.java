@@ -8,7 +8,5 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 public class CreateOrderByOnlineRequestDto {
-
-    private Long userId;
     private UUID addressId;
 }

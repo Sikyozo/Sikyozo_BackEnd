@@ -9,6 +9,5 @@ import java.util.UUID;
 @Setter
 public class DeletePaymentRequestDto {
 
-    private Long userId;
     private UUID paymentId;
 }

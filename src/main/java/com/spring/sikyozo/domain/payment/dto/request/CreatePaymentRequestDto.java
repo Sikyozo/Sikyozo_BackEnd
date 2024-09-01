@@ -9,7 +9,6 @@ import java.util.UUID;
 @Setter
 public class CreatePaymentRequestDto {
 
-    private Long userId;
     private UUID orderId;
     private Long price;
 }
