@@ -5,7 +5,7 @@ import com.spring.sikyozo.domain.cart.dto.request.DeleteItemRequestDto;
 import com.spring.sikyozo.domain.cart.dto.response.GetCartResponseDto;
 import com.spring.sikyozo.domain.cart.dto.response.RemoveFromCartResponseDto;
 import com.spring.sikyozo.domain.cart.service.CartService;
-import com.spring.sikyozo.global.dto.ResponseDto;
+import com.spring.sikyozo.global.exception.dto.ApiSuccessResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -15,59 +15,59 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/users/{userId}/carts")
+@RequestMapping("/api/carts")
 @RequiredArgsConstructor
 public class CartController {
 
     private final CartService cartService;
 
     @PutMapping
-    public ResponseEntity<ResponseDto<String>> addOrUpdateCartItem(@PathVariable @NotNull Long userId, @RequestBody AddOrUpdateCartItemRequestDto requestItemDto) {
-
-        /*
-         * jwt로 로그인한 사용자와 pathVariable의 userId가 맞는지 검증 로직 추가
-         */
-
-        cartService.addOrUpdateCartItem(userId, requestItemDto.getMenuId(), requestItemDto.getQuantity());
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.success("장바구니 추가가 성공적으로 진행되었습니다."));
+    public ResponseEntity<ApiSuccessResponse<Void>> addOrUpdateCartItem(@RequestBody AddOrUpdateCartItemRequestDto requestItemDto) {
+        cartService.addOrUpdateCartItem(requestItemDto.getMenuId(), requestItemDto.getQuantity());
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.CREATED,
+                        "/api/carts",
+                        null
+                ));
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto<List<GetCartResponseDto>>> getCart(@PathVariable @NotNull Long userId) {
-
-        /*
-         * jwt로 로그인한 사용자와 pathVariable의 userId가 맞는지 검증 로직 추가
-         */
-
-        return ResponseEntity.status(HttpStatus.OK).body(cartService.getCart(userId));
-
+    public ResponseEntity<ApiSuccessResponse<List<GetCartResponseDto>>> getCart() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                                "/api/carts",
+                                cartService.getCart())
+                        );
     }
 
     @DeleteMapping
-    public ResponseEntity<ResponseDto<RemoveFromCartResponseDto>> removeFromCart(@PathVariable @NotNull Long userId, @RequestBody @Valid DeleteItemRequestDto deleteItemRequestDto) {
-
-        /*
-         * jwt로 로그인한 사용자와 pathVariable의 userId가 맞는지 검증 로직 추가
-         */
-
-        UUID menuId = cartService.removeItemFromCart(userId, deleteItemRequestDto.getMenuId());
-        RemoveFromCartResponseDto removeFromCartResponseDto = new RemoveFromCartResponseDto(menuId.toString());
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success("장바구니에서 메뉴가 제거되었습니다", removeFromCartResponseDto));
+    public ResponseEntity<ApiSuccessResponse<RemoveFromCartResponseDto>> removeFromCart(@RequestBody @Valid DeleteItemRequestDto deleteItemRequestDto) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        "/api/carts",
+                        cartService.removeItemFromCart(deleteItemRequestDto.getMenuId())
+                ));
     }
 
     @DeleteMapping("/clear")
-    public ResponseEntity<ResponseDto<String>> clearCart(@PathVariable @NotNull Long userId) {
-
-        /*
-         * jwt로 로그인한 사용자와 pathVariable의 userId가 맞는지 검증 로직 추가
-         */
-
-        cartService.clearCart(userId);
-        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.success("장바구니가 모두 삭제되었습니다."));
+    public ResponseEntity<ApiSuccessResponse<Void>> clearCart() {
+        cartService.clearCart();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        "/api/carts/clear",
+                        null
+                ));
     }
 
 }
