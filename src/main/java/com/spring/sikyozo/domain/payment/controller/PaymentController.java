@@ -54,7 +54,7 @@ public class PaymentController {
     }
 
     /*
-     * 주문 조회
+     * 결제 조회
      */
 
     /*
