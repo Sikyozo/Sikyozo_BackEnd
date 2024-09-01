@@ -1,6 +1,7 @@
 package com.spring.sikyozo.domain.payment.entity;
 
 import com.spring.sikyozo.domain.order.entity.Order;
+import com.spring.sikyozo.domain.order.entity.OrderPaymentStatus;
 import com.spring.sikyozo.domain.payment.exception.*;
 import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.user.entity.User;
@@ -97,6 +98,10 @@ public class Payment {
     public static Payment create(User user, Order order , Long price) {
         if (!price.equals(order.getTotalPrice())) {
             throw new PaymentAmoutMismatchException();
+        }
+
+        if (order.getOrderPaymentStatus() != OrderPaymentStatus.PENDING) {
+            throw new PaymentAlreadyExistsException();
         }
 
         Payment payment = new Payment();

@@ -12,6 +12,7 @@ public enum PaymentErrorCode implements ErrorCode {
         PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "결제 금액이 일치하지 않습니다."),
         PAYMENT_ALREADY_CANCELED(HttpStatus.BAD_REQUEST, "이미 취소된 결제입니다."),
         PAYMENT_ALREADY_DELETED(HttpStatus.FORBIDDEN, "이미 삭제된 결제 정보입니다."),
+        PAYMENT_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "해당 주문에 이미 결제 정보가 존재합니다.")
 
     ;
 
