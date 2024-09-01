@@ -123,6 +123,10 @@ public class Payment {
             throw new PaymentAlreadyFailedException();
         }
 
+        if (status.equals(PaymentStatus.CANCELED)) {
+            throw new PaymentAlreadyCanceledException();
+        }
+
         if (!this.price.equals(price)) {
             throw new PaymentAmoutMismatchException();
         }
