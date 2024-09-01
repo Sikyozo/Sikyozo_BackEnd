@@ -1,17 +1,18 @@
 package com.spring.sikyozo.domain.cart.service;
 
 import com.spring.sikyozo.domain.cart.dto.response.GetCartResponseDto;
+import com.spring.sikyozo.domain.cart.dto.response.RemoveFromCartResponseDto;
 import com.spring.sikyozo.global.dto.ResponseDto;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface CartService {
-    void addOrUpdateCartItem(Long userId, UUID menuId, Integer quantity);
+    void addOrUpdateCartItem(UUID menuId, Integer quantity);
 
-    UUID removeItemFromCart(Long userId, UUID menuId);
+    RemoveFromCartResponseDto removeItemFromCart(UUID menuId);
 
-    ResponseDto<List<GetCartResponseDto>> getCart(Long userId);
+    List<GetCartResponseDto> getCart();
 
-    void clearCart(Long userId);
+    void clearCart();
 }

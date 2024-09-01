@@ -5,26 +5,24 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.spring.sikyozo.domain.order.dto.response.GetOrderResponseDto;
 import com.spring.sikyozo.domain.order.entity.Order;
 import com.spring.sikyozo.domain.order.exception.OrderNotFoundException;
 import com.spring.sikyozo.domain.order.repository.OrderRepository;
-import com.spring.sikyozo.domain.payment.dto.request.GetPaymentsRequestDto;
 import com.spring.sikyozo.domain.payment.dto.response.*;
 import com.spring.sikyozo.domain.payment.entity.Payment;
 import com.spring.sikyozo.domain.payment.entity.PaymentStatus;
 import com.spring.sikyozo.domain.payment.entity.PaymentType;
-import com.spring.sikyozo.domain.payment.exception.*;
+import com.spring.sikyozo.domain.payment.exception.PaymentNotFoundException;
 import com.spring.sikyozo.domain.payment.repository.PaymentRepository;
 import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.store.exception.StoreNotFoundException;
 import com.spring.sikyozo.domain.store.repository.StoreRepository;
 import com.spring.sikyozo.domain.user.entity.User;
 import com.spring.sikyozo.domain.user.entity.UserRole;
+import com.spring.sikyozo.domain.user.exception.AccessDeniedException;
 import com.spring.sikyozo.domain.user.exception.UserNotFoundException;
-import com.spring.sikyozo.domain.user.exception.UserNotHasPermissionException;
 import com.spring.sikyozo.domain.user.repository.UserRepository;
-import com.spring.sikyozo.global.dto.ResponseDto;
+import com.spring.sikyozo.global.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -49,25 +47,29 @@ public class PaymentService {
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
     private final JPAQueryFactory jpaQueryFactory;
+    private final SecurityUtil securityUtil;
 
 
     /*
      * 결제 생성
      */
     @Transactional
-    public ResponseDto<CreatePaymentRseponseDto> createPayment(UUID orderId, Long loginUserId, Long price) {
-        log.info("결제 생성이 요청되었습니다. orderId: {}, userId: {}, price: {}", orderId, loginUserId, price);
+    public CreatePaymentRseponseDto createPayment(UUID orderId, Long price) {
+
+        User loginUser = securityUtil.getCurrentUser();
+        Long loginUserId = loginUser.getId();
         Order order = findOrderById(orderId);
-        User loginUser = findUserById(loginUserId);
+
+        log.info("결제 생성이 요청되었습니다. orderId: {}, userId: {}, price: {}", orderId, loginUserId, price);
 
         if (!isManagerOrMaster(loginUser) && loginUser.getOrders().contains(order)) {
             Payment payment = Payment.create(loginUser, order, price);
             paymentRepository.save(payment);
             log.info("결제 생성 요청이 정상 처리 되었습니다.. userId: {}, orderId: {}, price: {}", orderId, loginUserId, price);
-            return ResponseDto.success("결제를 생성했습니다.", new CreatePaymentRseponseDto(payment.getId(), orderId, price));
+            return new CreatePaymentRseponseDto(payment.getId(), orderId, price);
         }
         log.warn("결제 생성에 실패하였습니다. userId: {}, orderId: {}, price: {}", orderId, loginUserId, price);
-        throw new CannotCreatePaymentException("결제 권한이 없습니다.");
+        throw new AccessDeniedException();
     }
 
 
@@ -85,81 +87,92 @@ public class PaymentService {
 
 
     private Order findOrderById(UUID orderId) {
-        return orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException("주문 정보를 찾을 수 없습니다."));
+        return orderRepository.findById(orderId).orElseThrow(OrderNotFoundException::new);
     }
 
     private User findUserById(Long loginUserId) {
-        return userRepository.findById(loginUserId).orElseThrow(() -> new UserNotFoundException("주문 정보를 찾을 수 없습니다."));
+        return userRepository.findById(loginUserId).orElseThrow(UserNotFoundException::new);
     }
 
     /*
      * 결제 진행
      */
     @Transactional
-    public ResponseDto<ProcessPaymentResponseDto> processPayment(Long loginUserId, UUID paymentId, PaymentType paymentType, Long price) {
-        log.info("결제 처리를 요청하였습니다. userId: {}, paymentId: {}, price: {}", loginUserId, paymentId, price);
-        User loginUser = findUserById(loginUserId);
+    public ProcessPaymentResponseDto processPayment(UUID paymentId, PaymentType paymentType, Long price) {
+
+        User loginUser = securityUtil.getCurrentUser();
+        Long loginUserId = loginUser.getId();
         Payment payment = findPaymentById(paymentId);
+
+        log.info("결제 처리를 요청하였습니다. userId: {}, paymentId: {}, price: {}", loginUserId, paymentId, price);
 
         if (!isManagerOrMaster(loginUser) && loginUser.getPayments().contains(payment)) {
             payment.processPayment(paymentType, price);
             log.info("결제를 정상적으로 처리하였습니다. erId: {}, paymentId: {}, price: {}", loginUserId, paymentId, price);
-            return ResponseDto.success("결제를 성공했습니다.", new ProcessPaymentResponseDto(paymentId, price));
+            return new ProcessPaymentResponseDto(paymentId, price);
         }
         log.warn("결제를 처리를 실패하였습니다.. erId: {}, paymentId: {}, price: {}", loginUserId, paymentId, price);
-        throw new CannotProcessPaymentException("결제 권한이 없습니다.");
+        throw new AccessDeniedException();
     }
 
     private Payment findPaymentById(UUID paymentId) {
-        return paymentRepository.findById(paymentId).orElseThrow(() -> new PaymentNotFoundException("결제 정보를 찾을 수 없습니다."));
+        return paymentRepository.findById(paymentId).orElseThrow(PaymentNotFoundException::new);
     }
 
     /*
      * 결제 취소
      */
     @Transactional
-    public ResponseDto<CancelPaymentResponseDto> cancelPayment(Long loginUserId, UUID paymentId) {
-        log.info("결제 취소를 요청하였습니다. userId: {}, paymentId: {}", loginUserId, paymentId);
-        User loginUser = findUserById(loginUserId);
+    public CancelPaymentResponseDto cancelPayment(UUID paymentId) {
+
+        User loginUser = securityUtil.getCurrentUser();
+        Long loginUserId = loginUser.getId();
         Payment payment = findPaymentById(paymentId);
+
+        log.info("결제 취소를 요청하였습니다. userId: {}, paymentId: {}", loginUserId, paymentId);
 
         if (!isManagerOrMaster(loginUser)) {
             log.warn("결제 취소를 실패하였습니다. userId: {}, paymentId: {}", loginUserId, paymentId);
-            throw new CannotCancelPaymentException("관리자만 결제를 취소할 수 있습니다.");
+            throw new AccessDeniedException();
         }
 
         payment.cancel(loginUser);
         log.info("결제를 정상적으로 취소하였습니다. userId: {}, paymentId: {}", loginUserId, paymentId);
-        return ResponseDto.success("결제를 취소했습니다.", new CancelPaymentResponseDto(loginUser.getId(), payment.getId(), payment.getOrder().getId(), payment.getPrice()));
+        return new CancelPaymentResponseDto(loginUser.getId(), payment.getId(), payment.getOrder().getId(), payment.getPrice());
     }
 
     /*
      * 결제 삭제
      */
     @Transactional
-    public ResponseDto<DeletePaymentResponseDto> deletePayment(Long loginUserId, UUID paymentId) {
-        log.info("결제 삭제를 요청하였습니다.. userId: {}, paymentId: {}", loginUserId, paymentId);
+    public DeletePaymentResponseDto deletePayment(UUID paymentId) {
 
-        User loginUser = findUserById(loginUserId);
+        User loginUser = securityUtil.getCurrentUser();
+        Long loginUserId = loginUser.getId();
+
+        log.info("결제 삭제를 요청하였습니다.. userId: {}, paymentId: {}", loginUserId, paymentId);
 
         if (!isManagerOrMaster(loginUser)) {
             log.info("결제 삭제를 실패하였습니다. userId: {}, paymentId: {}", loginUserId, paymentId);
-            throw new PaymentException("결제 삭제 권한이 없습니다.");
+            throw new AccessDeniedException();
         }
 
         Payment payment = findPaymentById(paymentId);
         payment.delete(loginUser);
         log.info("결제 정상적으로 삭제하였습니다. userId: {}, paymentId: {}", loginUserId, paymentId);
-        return ResponseDto.success("결제를 삭제했습니다.", new DeletePaymentResponseDto(paymentId));
+        return new DeletePaymentResponseDto(paymentId);
     }
 
     /*
      * 결제 조회
      */
     @Transactional(readOnly = true)
-    public ResponseDto<Page<GetPaymentsResponseDto>> getPayments(Long userId, UUID storeId, Long loginUserId, PaymentType type, PaymentStatus status, String show, Pageable pageable) {
+    public Page<GetPaymentsResponseDto> getPayments(Long userId, UUID storeId, PaymentType type, PaymentStatus status, String show, Pageable pageable) {
+
+        User loginUser = securityUtil.getCurrentUser();
+        Long loginUserId = loginUser.getId();
+
         log.info("결제 목록 조회를 요청하였습니다. userId: {}, loginUserId: {}", userId, loginUserId);
-        User loginUser = findUserById(loginUserId);
 
         verifyHasPermissionToGetAllPayments(userId, storeId, loginUser);
         verifyHasPermissionToGetStorePayments(userId, storeId, loginUser);
@@ -191,7 +204,7 @@ public class PaymentService {
                 );
 
         Page<Payment> page = PageableExecutionUtils.getPage(payments, pageable, countQuery::fetchOne);
-        return ResponseDto.success("주문 데이터를 조회했습니다.", page.map(GetPaymentsResponseDto::new));
+        return page.map(GetPaymentsResponseDto::new);
 
     }
 
@@ -242,7 +255,7 @@ public class PaymentService {
             if (isCustomer(loginUser) || isOwner(loginUser)) {
                 if (!loginUser.getId().equals(userId)) {
                     log.warn("단일 유저 결제 목록 조회 검증에 실패했습니다. loginUserId: {}, userId: {}, storeId: {}", loginUser.getId(), userId, storeId);
-                    throw new UserNotHasPermissionException("본인의 결제 목록만 조회할 수 있습니다.");
+                    throw new AccessDeniedException();
                 }
             }
         }
@@ -252,14 +265,14 @@ public class PaymentService {
         if (userId == null && storeId != null) {
             if (isCustomer(loginUser)) {
                 log.warn("가게 결제 목록 조회에 실패했습니다. loginUserId: {}, userId: {}, storeId: {}", loginUser.getId(), userId, storeId);
-                throw new UserNotHasPermissionException("가게 주인만 가게의 결제를 조회할 수 있습니다.");
+                throw new AccessDeniedException();
             }
 
             Store store = findStoreById(storeId);
 
             if (isOwner(loginUser) && !loginUser.getStores().contains(store)) {
                 log.warn("가게 결제 목록 조회에 실패했습니다. loginUserId: {}, userId: {}, storeId: {}", loginUser.getId(), userId, storeId);
-                throw new UserNotHasPermissionException("가게 주인만 가게의 결제를 조회할 수 있습니다.");
+                throw new AccessDeniedException();
             }
         }
     }
@@ -268,7 +281,7 @@ public class PaymentService {
         if (userId == null && storeId == null) {
             if (!isManagerOrMaster(loginUser)) {
                 log.warn("전체 결제 목록 조회에 실패했습니다. loginUserId: {}, userId: {}, storeId: {}", loginUser.getId(), userId, storeId);
-                throw new UserNotHasPermissionException("전체 결제 조회 권한이 없습니다.");
+                throw new AccessDeniedException();
             }
         }
     }
@@ -277,38 +290,40 @@ public class PaymentService {
      *  단 건 결제 조회
      */
     @Transactional(readOnly = true)
-    public ResponseDto<GetPaymentsResponseDto> getPayment(Long loginUserId, UUID paymentId) {
+    public GetPaymentsResponseDto getPayment(UUID paymentId) {
+
+
+        User loginUser = securityUtil.getCurrentUser();
+        Long loginUserId = loginUser.getId();
+        Payment payment = findPaymentById(paymentId);
 
         log.info("결제 조회 요청 loginUserId: {}, orderId: {}", loginUserId, paymentId);
 
-        User loginUser = findUserById(loginUserId);
-        Payment payment = findPaymentById(paymentId);
-
         if (isCustomer(loginUser) && !loginUser.getOrders().contains(payment)) {
-            throw new UserNotHasPermissionException("본인의 결제 내역만 조회할 수 있습니다.");
+            throw new AccessDeniedException();
         }
 
         if (isOwner(loginUser)) {
             for (Store store : loginUser.getStores()) {
                 store.getPayments().contains(payment);
                 log.info("결제 조회 성공 loginUserId: {}, paymentId: {}", loginUserId, paymentId);
-                return ResponseDto.success("결제 조회 성공", new GetPaymentsResponseDto(payment));
+                return new GetPaymentsResponseDto(payment);
             }
 
         }
 
         if (isManagerOrMaster(loginUser)) {
             log.info("결제 조회 성공 loginUserId: {}, orderId: {}", loginUserId, paymentId);
-            return ResponseDto.success("결제 조회 성공", new GetPaymentsResponseDto(payment));
+            return new GetPaymentsResponseDto(payment);
         }
 
         log.warn("결제 조회 실패 loginUserId: {}, paymentId: {}", loginUserId, paymentId);
 
-        throw new UserNotHasPermissionException("결제 조회 권한이 없습니다.");
+        throw new AccessDeniedException();
     }
 
     private Store findStoreById(UUID storeId) {
-        return storeRepository.findById(storeId).orElseThrow(() -> new StoreNotFoundException("존재하지 않는 가게입니다."));
+        return storeRepository.findById(storeId).orElseThrow(StoreNotFoundException::new);
     }
 
 }

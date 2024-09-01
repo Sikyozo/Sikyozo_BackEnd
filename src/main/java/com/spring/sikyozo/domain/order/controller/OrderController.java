@@ -7,6 +7,8 @@ import com.spring.sikyozo.domain.order.entity.OrderStatus;
 import com.spring.sikyozo.domain.order.entity.OrderType;
 import com.spring.sikyozo.domain.order.service.OrderService;
 import com.spring.sikyozo.global.dto.ResponseDto;
+import com.spring.sikyozo.global.exception.dto.ApiSuccessResponse;
+import com.spring.sikyozo.global.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,27 +29,44 @@ public class OrderController {
      * 비대면 주문
      */
     @PostMapping("/online")
-    public ResponseEntity<ResponseDto<CreateOrderResponseDto>> createOrderByOnline(@RequestBody CreateOrderByOnlineRequestDto onlineRequestDto) {
-        ResponseDto<CreateOrderResponseDto> orderByOnline = orderService.createOrderByOnline(onlineRequestDto.getUserId(), onlineRequestDto.getAddressId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderByOnline);
+    public ResponseEntity<ApiSuccessResponse<CreateOrderResponseDto>> createOrderByOnline(@RequestBody CreateOrderByOnlineRequestDto onlineRequestDto) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.CREATED,
+                        "/api/orders",
+                        orderService.createOrderByOnline(onlineRequestDto.getAddressId())
+                ));
     }
 
     /*
      * 대면 주문
      */
     @PostMapping("/offline")
-    public ResponseEntity<ResponseDto<CreateOrderResponseDto>> createOrderByOffline(@RequestBody CreateOrderByOfflineRequest offlineRequestDto) {
-        ResponseDto<CreateOrderResponseDto> orderByOnline = orderService.createOrderByOffline(offlineRequestDto.getUserId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderByOnline);
+    public ResponseEntity<ApiSuccessResponse<CreateOrderResponseDto>> createOrderByOffline() {
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.CREATED,
+                        "/path/offline/offline",
+                        orderService.createOrderByOffline()
+                ));
     }
 
     /*
      * 주문 취소
      */
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<ResponseDto<String>> cancelOrder(@PathVariable UUID orderId, @RequestBody CancelOrderDto cancelOrderDto) {
-        ResponseDto<String> cancelOrderResponse = orderService.cancelOrder(orderId, cancelOrderDto.getUserId());
-        return ResponseEntity.status(HttpStatus.OK).body(cancelOrderResponse);
+    public ResponseEntity<ApiSuccessResponse<Void>> cancelOrder(@PathVariable UUID orderId) {
+        orderService.cancelOrder(orderId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        "/api/orders/online",
+                        null
+                ));
     }
 
     /*
@@ -58,27 +77,38 @@ public class OrderController {
      * show : All, deleted, null
      */
     @GetMapping
-    public ResponseEntity<ResponseDto<Page<GetOrderResponseDto>>> getOrders(
+    public ResponseEntity<ApiSuccessResponse<Page<GetOrderResponseDto>>> getOrders(
             @RequestParam(required = false) Long userId,
             @RequestParam(required = false) UUID storeId,
             @RequestParam(required = false) OrderType type,
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) OrderPaymentStatus paymentStatus,
             @RequestParam(required = false) String show,
-            @RequestBody GetOrdersRequestDto getOrdersRequestDto,
             Pageable pageable) {
-        Long loginUserId = getOrdersRequestDto.getUserId();
-        ResponseDto<Page<GetOrderResponseDto>> orderResponse = orderService.getOrders(userId, storeId, loginUserId, type, status, paymentStatus, show, pageable);
-        return ResponseEntity.status(HttpStatus.OK).body(orderResponse);
+
+        Page<GetOrderResponseDto> orderResponse = orderService.getOrders(userId, storeId, type, status, paymentStatus, show, pageable);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        "/api/orders?userId=" + userId + "&storeId=" + storeId + "&type=" + type + "&status=" + status
+                        + "&paymentStatus=" + paymentStatus + "&show=" + show,
+                        orderResponse
+                ));
     }
 
     /*
      * 주문 수락
      */
     @PatchMapping("/{orderId}/accept")
-    public ResponseEntity<ResponseDto<AcceptOrderResponseDto>> acceptOrder(@PathVariable UUID orderId, @RequestBody AcceptOrderRequestDto acceptOrderRequestDto) {
-        ResponseDto<AcceptOrderResponseDto> acceptOrderResponse = orderService.acceptOrder(orderId, acceptOrderRequestDto.getUserId());
-        return ResponseEntity.status(HttpStatus.OK).body(acceptOrderResponse);
+    public ResponseEntity<ApiSuccessResponse<AcceptOrderResponseDto>> acceptOrder(@PathVariable UUID orderId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        "/api/orders/" + orderId + "/accept",
+                        orderService.acceptOrder(orderId)
+                ));
     }
 
     /*
@@ -86,36 +116,56 @@ public class OrderController {
      */
 
     @PatchMapping("/{orderId}/reject")
-    public ResponseEntity<ResponseDto<RejectOrderResponseDto>> rejectOrder(@PathVariable UUID orderId, @RequestBody RejectOrderRequestDto rejectOrderRequestDto) {
-        ResponseDto<RejectOrderResponseDto> rejectOrderResponse = orderService.rejectOrder(orderId, rejectOrderRequestDto.getUserId());
-        return ResponseEntity.status(HttpStatus.OK).body(rejectOrderResponse);
-    }
+    public ResponseEntity<ApiSuccessResponse<RejectOrderResponseDto>> rejectOrder(@PathVariable UUID orderId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        "/api/orders/" + orderId + "/reject",
+                        orderService.rejectOrder(orderId)
+                ));
+    };
 
     /*
      * 주문 처리 완료
      */
 
     @PatchMapping("/{orderId}/complete")
-    public ResponseEntity<ResponseDto<CompleteOrderResponseDto>> completeOrder(@PathVariable UUID orderId, @RequestBody CompleteOrderRequestDto completeOrderRequestDto) {
-        ResponseDto<CompleteOrderResponseDto> completeOrderResponse = orderService.completeOrder(orderId, completeOrderRequestDto.getUserId());
-        return ResponseEntity.status(HttpStatus.OK).body(completeOrderResponse);
+    public ResponseEntity<ApiSuccessResponse<CompleteOrderResponseDto>> completeOrder(@PathVariable UUID orderId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        "/api/orders/" + orderId + "/complete",
+                        orderService.completeOrder(orderId)
+                ));
     }
 
     /*
      * 주문 삭제 (소프트)
      */
     @DeleteMapping("/{orderId}/delete")
-    public ResponseEntity<ResponseDto<DeleteOrderResponseDto>> deleteOrder(@PathVariable UUID orderId, @RequestBody DeleteOrderRequestDto deleteOrderRequestDto) {
-        ResponseDto<DeleteOrderResponseDto> deleteOrderResponse = orderService.deleteOrder(orderId, deleteOrderRequestDto.getUserId());
-        return ResponseEntity.status(HttpStatus.OK).body(deleteOrderResponse);
+    public ResponseEntity<ApiSuccessResponse<DeleteOrderResponseDto>> deleteOrder(@PathVariable UUID orderId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        "/api/orders/" + orderId + "/delte",
+                        orderService.deleteOrder(orderId)
+                ));
     }
 
     /*
      *  단일 주문 조회
      */
     @GetMapping("/{orderId}")
-    public ResponseEntity<ResponseDto<GetOrderResponseDto>> getOrder(@PathVariable UUID orderId, @RequestBody GetOrdersRequestDto getOrdersRequestDto) {
-        ResponseDto<GetOrderResponseDto> orderResponse = orderService.getOrder(getOrdersRequestDto.getUserId(), orderId);
-        return ResponseEntity.status(HttpStatus.OK).body(orderResponse);
+    public ResponseEntity<ApiSuccessResponse<GetOrderResponseDto>> getOrder(@PathVariable UUID orderId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiSuccessResponse.of(
+                        HttpStatus.OK,
+                        "/api/orders/" + orderId,
+                        orderService.getOrder(orderId)
+                ));
     }
 }
