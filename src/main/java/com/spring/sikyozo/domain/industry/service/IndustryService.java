@@ -50,7 +50,7 @@ public class IndustryService {
     public Page<IndustryResponseDto> findAllIndustries(int page, int size, String search, String sortBy, String sortDirection) {
         User currentUser = securityUtil.getCurrentUser();
 
-        if (!isAdmin(currentUser) && !isOwner(currentUser)) {
+        if (!isAdmin(currentUser) && !isOwner(currentUser) && !isCustomer(currentUser)) {
             throw new AccessDeniedException();
         }
 
@@ -123,6 +123,11 @@ public class IndustryService {
     // OWNER 권한 체크
     private boolean isOwner(User user) {
         return user.getRole().equals(UserRole.OWNER);
+    }
+
+    // CUSTOMER 권한 체크
+    private boolean isCustomer(User user) {
+        return user.getRole().equals(UserRole.CUSTOMER);
     }
 
     // 업종 중복 확인
