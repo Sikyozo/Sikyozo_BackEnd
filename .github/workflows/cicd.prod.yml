@@ -43,7 +43,7 @@ jobs:
           echo "SPRING_DATA_REDIS_PORT=${{ secrets.SPRING_DATA_REDIS_PORT }}" >> .env.prod
           echo "SPRING_DATA_REDIS_USERNAME=${{ secrets.SPRING_DATA_REDIS_USERNAME }}" >> .env.prod
           echo "SPRING_DATA_REDIS_PASSWORD=${{ secrets.SPRING_DATA_REDIS_PASSWORD }}" >> .env.prod
-          echo "API_KEY=${{ secrets.API_KEY }}" >> .env.dev
+          echo "API_KEY=${{ secrets.API_KEY }}" >> .env.prod
 
       # Docker 로그인
       - name: Log in to Docker Hub
