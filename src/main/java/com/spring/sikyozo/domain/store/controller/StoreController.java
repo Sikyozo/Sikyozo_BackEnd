@@ -27,14 +27,13 @@ public class StoreController {
     @PostMapping
     public ResponseEntity<ApiSuccessResponse<StoreResponseDto>> createStore(
             @RequestBody CreateStoreRequestDto requestDto,
-            @RequestParam Long id,
             HttpServletRequest servletRequest) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servletRequest.getServletPath(),
-                        storeService.createStore(requestDto, id)
+                        storeService.createStore(requestDto)
                 ));
     }
 
@@ -42,7 +41,6 @@ public class StoreController {
     @PutMapping("/{storeId}")
     public ResponseEntity<ApiSuccessResponse<UpdateStoreResponseDto>> updateStore(
             @PathVariable UUID storeId,
-            @RequestParam Long userId,
             @RequestBody UpdateStoreRequestDto requestDto,
             HttpServletRequest servletRequest) {
         return ResponseEntity
@@ -50,7 +48,7 @@ public class StoreController {
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servletRequest.getServletPath(),
-                        storeService.updateStore(storeId, userId, requestDto)
+                        storeService.updateStore(storeId, requestDto)
                 ));
     }
 
@@ -58,9 +56,8 @@ public class StoreController {
     @PutMapping("/delete/{storeId}")
     public ResponseEntity<ApiSuccessResponse<String>> deleteStore(
             @PathVariable UUID storeId,
-            @RequestParam Long userId,
             HttpServletRequest servletRequest) {
-        storeService.deleteStore(storeId, userId);
+        storeService.deleteStore(storeId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
@@ -73,7 +70,6 @@ public class StoreController {
     // 가게 목록 조회 (검색)
     @GetMapping("/search")
     public ResponseEntity<ApiSuccessResponse<?>> searchStores(
-            @RequestParam Long userId,
             @RequestParam(required = false) String menuName,
             @RequestParam(required = false) String industryName,
             @RequestParam(defaultValue = "0") int page,
@@ -92,7 +88,7 @@ public class StoreController {
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
                         servletRequest.getServletPath(),
-                        storeService.searchStores(userId, menuName, industryName,pageable)
+                        storeService.searchStores(menuName, industryName,pageable)
                 ));
     }
 }

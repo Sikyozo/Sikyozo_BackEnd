@@ -21,6 +21,7 @@ import com.spring.sikyozo.domain.user.entity.User;
 import com.spring.sikyozo.domain.user.entity.UserRole;
 import com.spring.sikyozo.domain.user.exception.UserNotFoundException;
 import com.spring.sikyozo.domain.user.repository.UserRepository;
+import com.spring.sikyozo.global.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,10 +40,11 @@ public class StoreService {
     private final RegionRepository regionRepository;
     private final IndustryRepository industryRepository;
     private final StoreIndustryRepository storeIndustryRepository;
+    private final SecurityUtil securityUtil;
 
     // 가게 생성
-    public StoreResponseDto createStore(CreateStoreRequestDto requestDto, Long userId) {
-        User user = isMember(userId);
+    public StoreResponseDto createStore(CreateStoreRequestDto requestDto) {
+        User user = isMember();
 
         validateOwnerRole(user);
 
@@ -104,9 +106,9 @@ public class StoreService {
 
     // 가게 수정
     @Transactional
-    public UpdateStoreResponseDto updateStore(UUID storeId, Long userId, UpdateStoreRequestDto requestDto) {
+    public UpdateStoreResponseDto updateStore(UUID storeId, UpdateStoreRequestDto requestDto) {
 
-        User user = isMember(userId);
+        User user = isMember();
 
        validateCustomerOrManagerOrMasterRole(user);
 
@@ -152,9 +154,9 @@ public class StoreService {
 
     // 가게 삭제
     @Transactional
-    public void deleteStore(UUID storeId, Long userId) {
+    public void deleteStore(UUID storeId) {
         // 유저확인 & 가게주인 회원인지 확인
-        User user = isMember(userId);
+        User user = isMember();
 
        validateCustomerOrManagerOrMasterRole(user);
 
@@ -175,9 +177,9 @@ public class StoreService {
 
     // 가게 목록 조회 (검색)
     @Transactional(readOnly = true)
-    public SearchStoreResponseDto searchStores(Long userId, String menuName, String industryName, Pageable pageable) {
+    public SearchStoreResponseDto searchStores(String menuName, String industryName, Pageable pageable) {
 
-        User user = isMember(userId);
+        User user = isMember();
 
         validateUserRoleForAccess(user);
 
@@ -196,8 +198,8 @@ public class StoreService {
     }
 
     // 사용자 확인
-    private User isMember(Long userId) {
-        return userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+    private User isMember() {
+        return securityUtil.getCurrentUser();
     }
 
     // 고객, 매니저, 마스터 권한 확인
