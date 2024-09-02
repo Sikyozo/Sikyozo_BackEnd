@@ -49,6 +49,11 @@ public class WebSecurityConfig {
             "/api/menus/**"
     };
 
+     private static final String[] AI_API_URL = {
+            "/api/ai",
+            "/api/ai/**"
+    };
+
     private final LoginService loginService;
     private final JwtProvider jwtProvider;
     private final RedisDao redisDao;
@@ -68,6 +73,7 @@ public class WebSecurityConfig {
                         .requestMatchers(INDUSTRY_API_URL).permitAll()
                         .requestMatchers(STORE_API_URL).permitAll()
                         .requestMatchers(MENU_API_URL).permitAll()
+                        .requestMatchers(AI_API_URL).permitAll()
                 )
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

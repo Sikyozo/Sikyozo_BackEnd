@@ -1,5 +1,6 @@
 package com.spring.sikyozo.domain.ai.entity;
 
+import com.spring.sikyozo.domain.menu.entity.Menu;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
 
@@ -17,7 +18,11 @@ public class Ai {
     @JoinColumn(name="user_id", nullable = false)
     private User user;
 
-    @Column(columnDefinition = "text", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "menu_id",nullable = false)
+    private Menu menu;
+
+    @Column(columnDefinition = "text",nullable = false)
     private String question;
 
     @Column(columnDefinition = "text")
@@ -35,6 +40,11 @@ public class Ai {
         this.createdAt = LocalDateTime.now();
     }
 
-
+    public void saveAiResponse(User user, String responseText, String requestText,Menu menu) {
+        this.user = user;
+        this.answer = responseText;
+        this.question = requestText;
+        this.menu = menu;
+    }
 
 }

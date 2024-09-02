@@ -23,6 +23,7 @@ jobs:
           echo "JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}" >> .env.dev
           echo "JWT_ACCESS_HEADER=${{ secrets.JWT_ACCESS_HEADER }}" >> .env.dev
           echo "JWT_REFRESH_HEADER=${{ secrets.JWT_REFRESH_HEADER }}" >> .env.dev
+          echo "API_KEY=${{ secrets.API_KEY }}" >> .env.dev
 
       - name: Create .env.prod file
         run: |
@@ -34,6 +35,7 @@ jobs:
           echo "JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}" >> .env.prod
           echo "JWT_ACCESS_HEADER=${{ secrets.JWT_ACCESS_HEADER }}" >> .env.prod
           echo "JWT_REFRESH_HEADER=${{ secrets.JWT_REFRESH_HEADER }}" >> .env.prod
+          echo "API_KEY=${{ secrets.API_KEY }}" >> .env.dev
 
       # 프로젝트 파일 압축 파일로 변환
       - name: Log in to Docker Hub
