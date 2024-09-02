@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spring.sikyozo.domain.ai.entity.Ai;
 import com.spring.sikyozo.domain.ai.entity.dto.request.AiRequestDto;
+import com.spring.sikyozo.domain.ai.exception.NoContentFoundException;
+import com.spring.sikyozo.domain.ai.exception.TextExtractionFailedException;
+import com.spring.sikyozo.domain.ai.exception.TextNotFoundException;
 import com.spring.sikyozo.domain.ai.repository.AiRepository;
 import com.spring.sikyozo.domain.menu.entity.Menu;
 import com.spring.sikyozo.domain.menu.exception.MenuNotFoundException;
@@ -84,7 +87,7 @@ public class AiService {
                 return content.getParts().get(0).getText();
             }
         }
-        return "No text available";
+        throw new TextNotFoundException();
     }
 
     private String callExternalApi(String requestBody) {
@@ -111,10 +114,10 @@ public class AiService {
                     return partsNode.get(0).path("text").asText();
                 }
             }
-            return "Error: No content found in response";
+            throw new NoContentFoundException();
         } catch (Exception e) {
             e.printStackTrace();
-            return "Error: Failed to extract text from response";
+            throw new TextExtractionFailedException();
         }
     }
 
