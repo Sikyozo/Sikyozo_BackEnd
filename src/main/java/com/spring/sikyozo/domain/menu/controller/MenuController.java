@@ -63,7 +63,7 @@ public class MenuController {
     @PutMapping("/delete/{menusId}")
     public ResponseEntity<ApiSuccessResponse<?>> deleteMenu(@PathVariable UUID menusId,
                                                             HttpServletRequest servletRequest) {
-        menuService.deleteMenu(menusId, userId);
+        menuService.deleteMenu(menusId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
