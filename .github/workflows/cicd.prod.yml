@@ -39,7 +39,7 @@ jobs:
           echo "JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}" >> .env.prod
           echo "JWT_ACCESS_HEADER=${{ secrets.JWT_ACCESS_HEADER }}" >> .env.prod
           echo "JWT_REFRESH_HEADER=${{ secrets.JWT_REFRESH_HEADER }}" >> .env.prod
-                    echo "SPRING_DATA_REDIS_HOST=${{ secrets.SPRING_DATA_REDIS_HOST }}" >> .env.prod
+          echo "SPRING_DATA_REDIS_HOST=${{ secrets.SPRING_DATA_REDIS_HOST }}" >> .env.prod
           echo "SPRING_DATA_REDIS_PORT=${{ secrets.SPRING_DATA_REDIS_PORT }}" >> .env.prod
           echo "SPRING_DATA_REDIS_USERNAME=${{ secrets.SPRING_DATA_REDIS_USERNAME }}" >> .env.prod
           echo "SPRING_DATA_REDIS_PASSWORD=${{ secrets.SPRING_DATA_REDIS_PASSWORD }}" >> .env.prod
