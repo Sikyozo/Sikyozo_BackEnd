@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface IndustryRepository extends JpaRepository<Industry, UUID> {
-    Optional<Industry> findByIndustryName(String industryName);
+    Optional<Industry> findByIndustryNameAndDeletedAtIsNull(String industryName);
     Page<Industry> findByIndustryNameContainingAndDeletedAtIsNull(String search, Pageable pageable);
     Page<Industry> findAllByDeletedAtIsNull(Pageable pageable);
     Optional<Industry> findByIdAndDeletedAtIsNull(UUID id);

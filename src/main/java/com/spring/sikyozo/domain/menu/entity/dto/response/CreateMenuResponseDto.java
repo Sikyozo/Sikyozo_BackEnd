@@ -3,8 +3,6 @@ package com.spring.sikyozo.domain.menu.entity.dto.response;
 import com.spring.sikyozo.domain.menu.entity.Menu;
 import lombok.Getter;
 
-import java.util.UUID;
-
 @Getter
 public class CreateMenuResponseDto {
 

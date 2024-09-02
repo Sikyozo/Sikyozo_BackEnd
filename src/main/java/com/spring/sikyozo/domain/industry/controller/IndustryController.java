@@ -3,7 +3,7 @@ package com.spring.sikyozo.domain.industry.controller;
 import com.spring.sikyozo.domain.industry.dto.request.IndustryRequestDto;
 import com.spring.sikyozo.domain.industry.dto.response.IndustryResponseDto;
 import com.spring.sikyozo.domain.industry.service.IndustryService;
-import com.spring.sikyozo.domain.user.dto.response.MessageResponseDto;
+import com.spring.sikyozo.domain.industry.dto.response.MessageResponseDto;
 import com.spring.sikyozo.global.exception.dto.ApiSuccessResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

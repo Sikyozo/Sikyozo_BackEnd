@@ -1,20 +1,20 @@
 package com.spring.sikyozo.domain.address.entity;
 
-import com.spring.sikyozo.domain.order.entity.Order;
-import com.spring.sikyozo.domain.payment.entity.Payment;
-import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.user.entity.User;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "p_addresses")
 public class Address {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -29,8 +29,7 @@ public class Address {
     @Column(length=100)
     private String request;
 
-    // 시간
-
+    // 생성, 수정, 삭제 시간
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -46,18 +45,39 @@ public class Address {
     @JoinColumn(name = "deleted_by")
     private User deletedBy;
 
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
 
-    //
+    @PreUpdate
+    protected void onUpdate() {
+        if (this.deletedAt == null)
+            this.updatedAt = LocalDateTime.now();
+    }
 
-    @OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
-    private Order order;
+    // updated_by
+    public void updatedBy(User currentUser) {
+        this.updatedBy = currentUser;
+    }
+
+    // deleted_by
+    public void deletedBy(User currentUser) {
+        this.deletedBy = currentUser;
+    }
+
+    // 배송지 및 요청 사항 업데이트
+    public void updateAddress(String addressName) {
+        this.addressName = addressName;
+    }
+
+    // 요청 사항 업데이트
+    public void updateRequest(String request) {
+        this.request = request;
+    }
+
+    // 배송지 삭제
+    public void deleteAddress() {
+        this.deletedAt = LocalDateTime.now();
+    }
 }

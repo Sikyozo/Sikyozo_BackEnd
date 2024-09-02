@@ -2,6 +2,7 @@ package com.spring.sikyozo.domain.store.entity;
 
 import com.spring.sikyozo.domain.industry.entity.Industry;
 import com.spring.sikyozo.domain.menu.entity.Menu;
+import com.spring.sikyozo.domain.order.entity.Order;
 import com.spring.sikyozo.domain.payment.entity.Payment;
 import com.spring.sikyozo.domain.region.entity.Region;
 import com.spring.sikyozo.domain.store.entity.dto.request.CreateStoreRequestDto;
@@ -66,6 +67,10 @@ public class Store {
     @OneToMany(mappedBy = "store")
     private List<StoreIndustry> storeIndustries = new ArrayList<>();
 
+    @OneToMany(mappedBy = "store")
+    private List<Order> orders = new ArrayList<>();
+
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
@@ -75,6 +80,24 @@ public class Store {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void addPayment(Payment payment) {
+        if (this.payments != payment) {
+            this.payments = payments;
+            payment.addStore(this);
+        }
+    }
+
+    public void addOrder(Order order) {
+        if (!this.orders.contains(order)) {
+            this.orders.add(order);
+            order.addStore(this);
+        }
+    }
+
+    public void removeOrder(Order order) {
+            this.orders.remove(order);
     }
 
     // 가게 생성

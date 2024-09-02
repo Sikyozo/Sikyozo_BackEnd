@@ -1,6 +1,5 @@
 package com.spring.sikyozo.domain.storeindustry.repository;
 
-import com.spring.sikyozo.domain.industry.entity.Industry;
 import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.storeindustry.entity.StoreIndustry;
 import org.springframework.data.jpa.repository.JpaRepository;
