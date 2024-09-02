@@ -20,6 +20,7 @@ import com.spring.sikyozo.domain.user.entity.UserRole;
 import com.spring.sikyozo.domain.user.exception.InvalidRoleException;
 import com.spring.sikyozo.domain.user.exception.UserNotFoundException;
 import com.spring.sikyozo.domain.user.repository.UserRepository;
+import com.spring.sikyozo.global.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,11 +38,12 @@ public class MenuService {
     private final MenuRepository menuRepository;
     private final UserRepository userRepository;
     private final StoreRepository storeRepository;
+    private final SecurityUtil securityUtil;
 
     // 상품 생성
-    public CreateMenuResponseDto createMenu(CreateMenuRequestDto requestDto, Long userId) {
+    public CreateMenuResponseDto createMenu(CreateMenuRequestDto requestDto) {
         // 로그인 유저 확인
-        User user = getUser(userId);
+        User user = getUser();
 
         // 유저가 가게 주인 회원인지 확인
         if (!UserRole.OWNER.equals(user.getRole())) {
@@ -60,8 +62,8 @@ public class MenuService {
 
     // 상품 수정
     @Transactional
-    public UpdateMenuResponseDto updateMenu(UpdateMenuRequestDto requestDto, UUID menusId, Long userId) {
-        User user = getUser(userId);
+    public UpdateMenuResponseDto updateMenu(UpdateMenuRequestDto requestDto, UUID menusId) {
+        User user = getUser();
 
         validateCustomerOrManagerOrMasterRole(user);
 
@@ -75,8 +77,8 @@ public class MenuService {
 
     // 상품 삭제
     @Transactional
-    public void deleteMenu(UUID menuId, Long userId) {
-        User user = getUser(userId);
+    public void deleteMenu(UUID menuId) {
+        User user = getUser();
 
         validateCustomerOrManagerOrMasterRole(user);
 
@@ -88,9 +90,9 @@ public class MenuService {
 
     // 상품 숨김
     @Transactional
-    public void hideMenu(UUID menuId, Long userId) {
+    public void hideMenu(UUID menuId) {
 
-        User user = getUser(userId);
+        User user = getUser();
 
         validateCustomerOrManagerOrMasterRole(user);
 
@@ -107,8 +109,8 @@ public class MenuService {
 
     // 상품 숨김 해제
     @Transactional
-    public void unHideMenu(UUID menuId, Long userId) {
-        User user = getUser(userId);
+    public void unHideMenu(UUID menuId) {
+        User user = getUser();
 
         validateCustomerOrManagerOrMasterRole(user);
 
@@ -150,8 +152,8 @@ public class MenuService {
     }
 
     // 회원 여부 확인
-    private User getUser(Long userId) {
-        return userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+    private User getUser() {
+        return securityUtil.getCurrentUser();
     }
 
     // 메뉴 여부 확인

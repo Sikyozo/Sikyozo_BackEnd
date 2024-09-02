@@ -8,6 +8,7 @@ import com.spring.sikyozo.domain.menu.entity.dto.response.GetMenusResponseDto;
 import com.spring.sikyozo.domain.menu.entity.dto.response.UpdateMenuResponseDto;
 import com.spring.sikyozo.domain.menu.service.MenuService;
 import com.spring.sikyozo.global.exception.dto.ApiSuccessResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,13 +33,13 @@ public class MenuController {
     @PostMapping
     public ResponseEntity<ApiSuccessResponse<CreateMenuResponseDto>> createMenu(
             @RequestBody CreateMenuRequestDto requestDto,
-            @RequestParam Long userId) {
+            HttpServletRequest servletRequest) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
-                        "api/menus",
-                        menuService.createMenu(requestDto, userId)
+                        servletRequest.getServletPath(),
+                        menuService.createMenu(requestDto)
                 ));
     }
 
@@ -47,27 +48,27 @@ public class MenuController {
     public ResponseEntity<ApiSuccessResponse<UpdateMenuResponseDto>> updateMenu(
             @RequestBody UpdateMenuRequestDto requestDto,
             @RequestParam UUID menusId,
-            @RequestParam Long userId) {
-        menuService.updateMenu(requestDto, menusId, userId);
+            HttpServletRequest servletRequest) {
+        menuService.updateMenu(requestDto, menusId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
-                        "api/menus?menusId=" + menusId + "&userId=" + userId,
-                        menuService.updateMenu(requestDto, menusId, userId)
+                        servletRequest.getServletPath(),
+                        menuService.updateMenu(requestDto, menusId)
                 ));
     }
 
     // 상품 삭제
     @PutMapping("/delete/{menusId}")
     public ResponseEntity<ApiSuccessResponse<?>> deleteMenu(@PathVariable UUID menusId,
-                                                            @RequestParam Long userId) {
+                                                            HttpServletRequest servletRequest) {
         menuService.deleteMenu(menusId, userId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
-                        "delete/" + userId,
+                        servletRequest.getServletPath(),
                         "삭제에 성공했습니다."
                 ));
     }
@@ -75,13 +76,13 @@ public class MenuController {
     // 상품 숨김
     @PutMapping("/hide/{menusId}")
     public ResponseEntity<ApiSuccessResponse<?>> hideMenu(@PathVariable UUID menusId,
-                                                          @RequestParam Long userId) {
-        menuService.hideMenu(menusId, userId);
+                                                          HttpServletRequest servletRequest) {
+        menuService.hideMenu(menusId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
-                        "api/menus/hide/" + menusId,
+                        servletRequest.getServletPath(),
                         "상품 숨김 처리가 되었습니다."
                 ));
     }
@@ -89,37 +90,38 @@ public class MenuController {
     // 상품 숨김 해제
     @PutMapping("/unhide/{menusId}")
     public ResponseEntity<ApiSuccessResponse<?>> unHideMenu(@PathVariable UUID menusId,
-                                                            @RequestParam Long userId) {
-        menuService.unHideMenu(menusId, userId);
+                                                            HttpServletRequest servletRequest) {
+        menuService.unHideMenu(menusId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
-                        "api/menus/unhide/" + menusId,
+                        servletRequest.getServletPath(),
                         "상품 숨김 처리 해제가 되었습니다."
                 ));
     }
 
     // 상품 전체 조회
     @GetMapping
-    public ResponseEntity<ApiSuccessResponse<List<GetMenusResponseDto>>> getAllMenus() {
+    public ResponseEntity<ApiSuccessResponse<List<GetMenusResponseDto>>> getAllMenus(HttpServletRequest servletRequest) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
-                        "api/menus",
+                        servletRequest.getServletPath(),
                         menuService.getAllMenus()
                 ));
     }
 
     // 상품 단일 조회
     @GetMapping("/{menusId}")
-    public ResponseEntity<ApiSuccessResponse<GetMenusResponseDto>> getMenuById(@PathVariable UUID menusId) {
+    public ResponseEntity<ApiSuccessResponse<GetMenusResponseDto>> getMenuById(@PathVariable UUID menusId,
+                                                                               HttpServletRequest servletRequest) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
-                        "api/menus/" + menusId,
+                        servletRequest.getServletPath(),
                         menuService.getMenuById(menusId)
                 ));
     }
@@ -130,7 +132,8 @@ public class MenuController {
             @RequestParam String menuName,
             @RequestParam String storeName,
             @RequestParam(required = false) Integer size,
-            @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable,
+            HttpServletRequest servletRequest) {
 
         // 페이지 크기 제한: 10, 30, 50 이외의 값은 10으로 설정
         int validatedSize = (size != null && (size == 10 || size == 30 || size == 50)) ? size : 10;
@@ -142,7 +145,7 @@ public class MenuController {
                 .status(HttpStatus.OK)
                 .body(ApiSuccessResponse.of(
                         HttpStatus.OK,
-                        "api/search?menuName=" + menuName + "&storeName=" + storeName,
+                        servletRequest.getServletPath(),
                         menuService.getMenuList(menuName, storeName, validatedPageable)
                 ));
     }
