@@ -4,12 +4,14 @@ import com.spring.sikyozo.domain.order.entity.Order;
 import com.spring.sikyozo.domain.order.entity.OrderPaymentStatus;
 import com.spring.sikyozo.domain.order.entity.OrderStatus;
 import com.spring.sikyozo.domain.order.entity.OrderType;
+import com.spring.sikyozo.domain.ordermenu.dto.OrderMenuDto;
 import com.spring.sikyozo.domain.ordermenu.entity.OrderMenu;
 import com.spring.sikyozo.domain.user.entity.User;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,7 +23,7 @@ public class GetOrderResponseDto {
     private String username;
     private String storeName;
     private OrderType orderType;
-    private List<OrderMenu> orderMenuList;
+    private List<OrderMenuDto> orderMenuList = new ArrayList<>();
     private Long totalPrice;
     private OrderStatus orderStatus;
     private OrderPaymentStatus orderPaymentStatus;
@@ -45,7 +47,9 @@ public class GetOrderResponseDto {
         this.totalPrice = order.getTotalPrice();
         this.orderStatus = order.getStatus();
         this.orderPaymentStatus = order.getOrderPaymentStatus();
-        this.orderMenuList = order.getOrderMenu();
+        for (OrderMenu orderMenu : order.getOrderMenu()) {
+            this.orderMenuList.add(new OrderMenuDto(orderMenu));
+        }
         this.createdAt = order.getCreatedAt();
         this.updatedAt = order.getUpdatedAt();
         this.acceptedAt = order.getAcceptedAt();
