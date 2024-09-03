@@ -3,11 +3,13 @@ package com.spring.sikyozo.domain.ordermenu.entity;
 import com.spring.sikyozo.domain.menu.entity.Menu;
 import com.spring.sikyozo.domain.order.entity.Order;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.util.UUID;
 
 @Entity
 @Table(name="p_order_menus")
+@Getter
 public class OrderMenu {
 
     @Id
