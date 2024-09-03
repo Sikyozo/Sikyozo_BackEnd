@@ -4,10 +4,12 @@
 |---|---|
 |주제|음식 주문 관리 플랫폼|
 |팀원 구성|[👑이예지](https://github.com/yezyaa) [박상훈](https://github.com/shoon95) [백지연](https://github.com/rkoji)|
-|개발|2024.08.22 ~ 2024.09.02|
-|테스트용 ID/PW|/|
-|배포 링크|[🔗Link](/)|
+|개발 기간|2024.08.22 ~ 2024.09.02|
+|WBS|[🔗Link](https://docs.google.com/spreadsheets/d/1B9-eKaWyVDEPraQsME3KE7rSMOYMzEIn4etAmwvgphE/edit?gid=2095547522#gid=2095547522)|
+|ERD|[🔗Link](https://www.erdcloud.com/d/wycyHNPkKMdWkbdnd)|
 |API 명세서|[🔗Link](https://bevel-seashore-dd5.notion.site/API-fff7cd0526aa8055b372f54c92933d0c)|
+|요구사항 정의서|[🔗Link](https://docs.google.com/spreadsheets/d/1B9-eKaWyVDEPraQsME3KE7rSMOYMzEIn4etAmwvgphE/edit?gid=0#gid=0)|
+|배포 링크|http://52.79.148.14|
 
 <br/><br/>
 
@@ -30,8 +32,8 @@
 ### 기술 스택
 - BE ![Java](https://img.shields.io/badge/Java17-%23ED8B00.svg?style=square&logo=openjdk&logoColor=white) <img src="https://img.shields.io/badge/Spring%20Boot-6DB33F?style=square&logo=springboot&logoColor=white"> <img src="https://img.shields.io/badge/Spring Security-6DB33F?style=square&logo=Spring Security&logoColor=white"> ![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-6DB33F?style=square&logo=Spring&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-black?style=square&logo=JSON%20web%20tokens) ![Gradle](https://img.shields.io/badge/Gradle-02303A.svg?style=square&logo=Gradle&logoColor=white)
 - DB ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1.svg?style=square&logo=PostgreSQL&logoColor=white)
- ![AmazonDynamoDB](https://img.shields.io/badge/Amazon%20RDS-527FFF?style=square&logo=AmazonRDS&logoColor=white)
-- Infra ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=square&logo=ubuntu&logoColor=white) <img src="https://img.shields.io/badge/Redis-DC382D?style=square&logo=Redis&logoColor=white"> <img src="https://img.shields.io/badge/Amazon%20EC2-FF9900?style=square&logo=Amazon%20EC2&logoColor=white">
+ ![AmazonDynamoDB](https://img.shields.io/badge/Amazon%20RDS-527FFF?style=square&logo=AmazonRDS&logoColor=white) <img src="https://img.shields.io/badge/Redis-DC382D?style=square&logo=Redis&logoColor=white">
+- Infra ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=square&logo=ubuntu&logoColor=white) <img src="https://img.shields.io/badge/Amazon%20EC2-FF9900?style=square&logo=Amazon%20EC2&logoColor=white">
 - CI/CD <img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=square&logo=GitHub Actions&logoColor=white"> <img src="https://img.shields.io/badge/Docker-%230db7ed.svg?style=square&logo=docker&logoColor=white"> ![Amazon CodeDeploy](https://img.shields.io/badge/Amazon%20CodeDeploy-6BBE47.svg?style=square&logo=Amazon%20AWS&logoColor=white)
 - Tools ![GitHub](https://img.shields.io/badge/Github-%23121011.svg?style=square&logo=github&logoColor=white) ![IntelliJ IDEA](https://img.shields.io/badge/IntelliJ%20IDEA-000000.svg?style=square&logo=intellij-idea&logoColor=white) ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=square&logo=postman&logoColor=white) ![Notion](https://img.shields.io/badge/Notion-%23000000.svg?style=square&logo=notion&logoColor=white)<br/><br/>
 
@@ -57,24 +59,20 @@
 ### **브랜치 전략**
 ![시켜조 Branch 전략](https://github.com/user-attachments/assets/16915582-437f-4228-8dd2-b28b03251f60)<br/><br/><br/>
 
-## **📝 프로젝트 문서**
-|문서|URL|
-|---|---|
-|ERD|[🔗Link](https://www.erdcloud.com/d/wycyHNPkKMdWkbdnd)|
-|API 명세서|[🔗Link](https://bevel-seashore-dd5.notion.site/API-fff7cd0526aa8055b372f54c92933d0c)|
-|요구사항 정의서|[🔗Link](https://docs.google.com/spreadsheets/d/1B9-eKaWyVDEPraQsME3KE7rSMOYMzEIn4etAmwvgphE/edit?gid=0#gid=0)|
-|WBS|[🔗Link](https://docs.google.com/spreadsheets/d/1B9-eKaWyVDEPraQsME3KE7rSMOYMzEIn4etAmwvgphE/edit?gid=2095547522#gid=2095547522)|
-<br/>
-
-### **ERD**
-<br/><br/>
-
-### **FlowChart**
-<br/><br/><br/>
-
 ## **☁️ 인프라 설계도**
-![시켜조 인프라 설계도](https://github.com/user-attachments/assets/d4529811-9ab9-4668-855a-dfe08ed7f5e6)<br/><br/>
+![시켜조 인프라 설계도](https://github.com/user-attachments/assets/d4529811-9ab9-4668-855a-dfe08ed7f5e6)<br/><br/><br/>
 
-### **실행 방법**
-
-<br/><br/>
+## **💡 실행 방법**
+1. Clone the repository
+```
+git clone https://github.com/Sikyozo/Sikyozo_BackEnd.git
+```
+2. Install dependencies and build the project
+```
+./gradlew build
+```
+3. Start the development server
+```
+./gradlew bootRun
+```
+![sikyozo_banner2](https://github.com/user-attachments/assets/00dd1577-5536-44f0-98a5-2d0fcbcd727a)
