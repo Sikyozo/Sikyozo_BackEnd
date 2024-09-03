@@ -60,7 +60,7 @@
 ![시켜조 Branch 전략](https://github.com/user-attachments/assets/16915582-437f-4228-8dd2-b28b03251f60)<br/><br/><br/>
 
 ## **☁️ 인프라 설계도**
-![시켜조 인프라 설계도](https://github.com/user-attachments/assets/d4529811-9ab9-4668-855a-dfe08ed7f5e6)<br/><br/><br/>
+![인프라 설계도 - 시켜조](https://github.com/user-attachments/assets/2cc7d6c0-4b4e-4e75-be4a-39864e9fa789)<br/><br/><br/>
 
 ## **💡 실행 방법**
 1. Clone the repository
