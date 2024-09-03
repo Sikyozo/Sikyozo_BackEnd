@@ -2,21 +2,25 @@ package com.spring.sikyozo.domain.payment.service;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.spring.sikyozo.domain.order.entity.Order;
+import com.spring.sikyozo.domain.order.entity.QOrder;
 import com.spring.sikyozo.domain.order.exception.OrderNotFoundException;
 import com.spring.sikyozo.domain.order.repository.OrderRepository;
 import com.spring.sikyozo.domain.payment.dto.response.*;
 import com.spring.sikyozo.domain.payment.entity.Payment;
 import com.spring.sikyozo.domain.payment.entity.PaymentStatus;
 import com.spring.sikyozo.domain.payment.entity.PaymentType;
+import com.spring.sikyozo.domain.payment.entity.QPayment;
 import com.spring.sikyozo.domain.payment.exception.PaymentNotFoundException;
 import com.spring.sikyozo.domain.payment.repository.PaymentRepository;
 import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.store.exception.StoreNotFoundException;
 import com.spring.sikyozo.domain.store.repository.StoreRepository;
+import com.spring.sikyozo.domain.user.entity.QUser;
 import com.spring.sikyozo.domain.user.entity.User;
 import com.spring.sikyozo.domain.user.entity.UserRole;
 import com.spring.sikyozo.domain.user.exception.AccessDeniedException;
@@ -34,7 +38,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import static com.spring.sikyozo.domain.order.entity.QOrder.order;
 import static com.spring.sikyozo.domain.payment.entity.QPayment.payment;
 
 @Service
@@ -180,24 +186,26 @@ public class PaymentService {
 
         List<Payment> payments = jpaQueryFactory
                 .selectFrom(payment)
+                .leftJoin(payment.deletedBy, QUser.user)
                 .where(
-                        userEq(userId),
-                        storeEq(storeId),
+                        userEq(userId, loginUser),
+                        storeEq(storeId, loginUser),
                         typeEq(type),
                         statusEq(status),
                         showEq(show, loginUser)
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(getSortOrder(pageable))
+                .orderBy(getSorPayment(pageable))
                 .fetch();
 
 
         JPAQuery<Long> countQuery = jpaQueryFactory
                 .select(payment.count())
+                .leftJoin(payment.deletedBy, QUser.user)
                 .where(
-                        userEq(userId),
-                        storeEq(storeId),
+                        userEq(userId, loginUser),
+                        storeEq(storeId, loginUser),
                         typeEq(type),
                         statusEq(status),
                         showEq(show, loginUser)
@@ -208,34 +216,60 @@ public class PaymentService {
 
     }
 
-    private OrderSpecifier<?> getSortOrder(Pageable pageable) {
+    private OrderSpecifier<?> getSorPayment(Pageable pageable) {
         if (pageable.getSort().isEmpty()) {
             return null; // 정렬 조건이 없을 때
         }
 
         Sort.Order sortOrder = pageable.getSort().iterator().next(); // 첫 번째 정렬 기준 사용
-        PathBuilder<Order> orderPath = new PathBuilder<>(Order.class, "order");
 
-        return new OrderSpecifier(
-                sortOrder.isAscending() ? com.querydsl.core.types.Order.ASC : com.querydsl.core.types.Order.DESC,
-                orderPath.get(sortOrder.getProperty())
-        );
+        switch (sortOrder.getProperty()) {
+            case "createdAt":
+                return new OrderSpecifier<>(
+                        sortOrder.isAscending() ? com.querydsl.core.types.Order.ASC : com.querydsl.core.types.Order.DESC,
+                        payment.createdAt
+                );
+            case "updatedAt":
+                return new OrderSpecifier<>(
+                        sortOrder.isAscending() ? com.querydsl.core.types.Order.ASC : com.querydsl.core.types.Order.DESC,
+                        payment.updatedAt
+                );
+            // 다른 필드에 대한 정렬 조건 추가
+            default:
+                throw new AccessDeniedException();
+        }
     }
 
-    private BooleanExpression userEq(Long userId) {
-        return (userId != null) ? payment.user.eq(findUserById(userId)) : null;
+
+    private BooleanExpression userEq(Long userId, User loginUser) {
+        if (isCustomer(loginUser)) {
+            if (userId != null && userId != loginUser.getId()) {
+                throw new AccessDeniedException();
+            }
+            return payment.user.eq(loginUser);
+        }
+
+        return (userId != null) ? payment.user.eq(findUserById(userId)) : Expressions.TRUE;
     }
 
-    private  BooleanExpression storeEq(UUID storeId) {
-        return (storeId != null) ? (payment.store.eq(findStoreById(storeId))) : null;
+    private  BooleanExpression storeEq(UUID storeId, User loginUser) {
+        List<UUID> loginUserStoreList = loginUser.getStores().stream().map(store -> store.getId()).collect(Collectors.toList());
+
+        if (isOwner(loginUser)) {
+            if (storeId != null && !loginUserStoreList.contains(storeId)) {
+                throw new AccessDeniedException();
+            }
+            return payment.store.id.in(loginUserStoreList);
+        }
+        return (storeId != null) ? payment.store.eq(findStoreById(storeId)) : Expressions.TRUE;
     }
 
     private  BooleanExpression statusEq(PaymentStatus status) {
-        return (status != null) ? (payment.status.eq(status)) : null;
+        return (status != null) ? (payment.status.eq(status)) : Expressions.TRUE;
     }
 
     private  BooleanExpression typeEq(PaymentType type) {
-        return (type != null) ? (payment.type.eq(type)) : null;
+        return (type != null) ? (payment.type.eq(type)) : Expressions.TRUE;
     }
 
     // all : 삭제, 미삭제 모두 조회
@@ -245,15 +279,15 @@ public class PaymentService {
 
         // Customer or Owner
         if (isOwner(loginUser) || isCustomer(loginUser)) {
-            return payment.deletedBy.isNull()
-                    .or(payment.deletedBy.ne(loginUser)
-                    .and(payment.deletedBy.role.ne(UserRole.MASTER)
-                    .and(payment.deletedBy.role.ne(UserRole.MANAGER))));
+            return payment.deletedAt.isNull()
+                    .or(payment.deletedBy.isNotNull()
+                            .and(payment.deletedBy.ne(loginUser))
+                            .and(payment.deletedBy.role.isNotNull().and(payment.deletedBy.role.ne(UserRole.MASTER)).and(payment.deletedBy.role.ne(UserRole.MANAGER))));
         }
 
         // 관리자만
         if (show == "all") {
-            return null;
+            return Expressions.TRUE;
         }
 
         // 관리자만
@@ -315,17 +349,20 @@ public class PaymentService {
 
         log.info("결제 조회 요청 loginUserId: {}, orderId: {}", loginUserId, paymentId);
 
-        if (isCustomer(loginUser) && !loginUser.getOrders().contains(payment)) {
-            throw new AccessDeniedException();
+        if (isCustomer(loginUser)) {
+            if (loginUser.getPayments().contains(payment)) {
+                log.info("결제 조회 성공 loginUserId: {}, paymentId: {}", loginUserId, paymentId);
+                return new GetPaymentsResponseDto(payment);
+            }
         }
 
         if (isOwner(loginUser)) {
             for (Store store : loginUser.getStores()) {
-                store.getPayments().contains(payment);
-                log.info("결제 조회 성공 loginUserId: {}, paymentId: {}", loginUserId, paymentId);
-                return new GetPaymentsResponseDto(payment);
+                if (store.getPayments().contains(payment)) {
+                    log.info("결제 조회 성공 loginUserId: {}, paymentId: {}", loginUserId, paymentId);
+                    return new GetPaymentsResponseDto(payment);
+                }
             }
-
         }
 
         if (isManagerOrMaster(loginUser)) {

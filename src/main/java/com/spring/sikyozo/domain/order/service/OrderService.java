@@ -1,7 +1,9 @@
 package com.spring.sikyozo.domain.order.service;
 
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -15,10 +17,7 @@ import com.spring.sikyozo.domain.menu.entity.Menu;
 import com.spring.sikyozo.domain.menu.exception.MenuNotFoundException;
 import com.spring.sikyozo.domain.menu.repository.MenuRepositoryImpl;
 import com.spring.sikyozo.domain.order.dto.response.*;
-import com.spring.sikyozo.domain.order.entity.Order;
-import com.spring.sikyozo.domain.order.entity.OrderPaymentStatus;
-import com.spring.sikyozo.domain.order.entity.OrderStatus;
-import com.spring.sikyozo.domain.order.entity.OrderType;
+import com.spring.sikyozo.domain.order.entity.*;
 import com.spring.sikyozo.domain.order.exception.OrderCancelTimeExpiredException;
 import com.spring.sikyozo.domain.order.exception.OrderNotFoundException;
 import com.spring.sikyozo.domain.order.repository.OrderRepository;
@@ -26,6 +25,7 @@ import com.spring.sikyozo.domain.ordermenu.entity.OrderMenu;
 import com.spring.sikyozo.domain.store.entity.Store;
 import com.spring.sikyozo.domain.store.exception.StoreNotFoundException;
 import com.spring.sikyozo.domain.store.repository.StoreRepository;
+import com.spring.sikyozo.domain.user.entity.QUser;
 import com.spring.sikyozo.domain.user.entity.User;
 import com.spring.sikyozo.domain.user.entity.UserRole;
 import com.spring.sikyozo.domain.user.exception.AccessDeniedException;
@@ -34,6 +34,7 @@ import com.spring.sikyozo.domain.user.repository.UserRepository;
 import com.spring.sikyozo.global.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.weaver.ast.Expr;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -274,21 +275,18 @@ public class OrderService {
 
         log.info("주문 조회 요청 loginUserId: {}, userId: {}, storeId", loginUserId, userId, storeId);
 
-        if (isOwner(loginUser) | isCustomer(loginUser)) {
+        if (isOwner(loginUser) || isCustomer(loginUser)) {
             if (show != null) {
                 throw new AccessDeniedException();
             }
         }
 
-        verifyHasPermissionToGetAllOrders(userId, storeId, loginUser);
-        verifyHasPermissionToGetStoreOrders(userId, storeId, loginUser);
-        verifyHasPermissionToGetUserOrders(userId, storeId, loginUser);
-
         List<Order> orders = jpaQueryFactory
                 .selectFrom(order)
+                .leftJoin(order.deletedBy, QUser.user)
                 .where(
-                        userEq(userId),
-                        storeEq(storeId),
+                        userEq(userId, loginUser),
+                        storeEq(storeId, loginUser),
                         typeEq(type),
                         statusEq(status),
                         orderPaymentStatusEq(orderPaymentStatus),
@@ -302,9 +300,10 @@ public class OrderService {
 
         JPAQuery<Long> countQuery = jpaQueryFactory
                 .select(order.count())
+                .leftJoin(order.deletedBy, QUser.user)
                 .where(
-                        userEq(userId),
-                        storeEq(storeId),
+                        userEq(userId, loginUser),
+                        storeEq(storeId, loginUser),
                         typeEq(type),
                         statusEq(status),
                         orderPaymentStatusEq(orderPaymentStatus),
@@ -329,15 +328,19 @@ public class OrderService {
 
         log.info("주문 조회 요청 loginUserId: {}, orderId: {}", loginUserId, orderId);
 
-        if (isCustomer(loginUser) && !loginUser.getOrders().contains(order)) {
-            throw new AccessDeniedException();
+        if (isCustomer(loginUser)) {
+            if (loginUser.getOrders().contains(order)) {
+                log.info("주문 조회 성공 loginUserId: {}, orderId: {}", loginUserId, orderId);
+                return new GetOrderResponseDto(order);
+            }
         }
 
         if (isOwner(loginUser)) {
             for (Store store : loginUser.getStores()) {
-                store.getOrders().contains(order);
-                log.info("주문 조회 성공 loginUserId: {}, orderId: {}", loginUserId, orderId);
-                return new GetOrderResponseDto(order);
+                if (store.getOrders().contains(order)) {
+                    log.info("주문 조회 성공 loginUserId: {}, orderId: {}", loginUserId, orderId);
+                    return new GetOrderResponseDto(order);
+                }
             }
 
         }
@@ -352,53 +355,78 @@ public class OrderService {
         throw new AccessDeniedException();
     }
 
-
     private OrderSpecifier<?> getSortOrder(Pageable pageable) {
         if (pageable.getSort().isEmpty()) {
             return null; // 정렬 조건이 없을 때
         }
 
         Sort.Order sortOrder = pageable.getSort().iterator().next(); // 첫 번째 정렬 기준 사용
-        PathBuilder<Order> orderPath = new PathBuilder<>(Order.class, "order");
 
-        return new OrderSpecifier(
-                sortOrder.isAscending() ? com.querydsl.core.types.Order.ASC : com.querydsl.core.types.Order.DESC,
-                orderPath.get(sortOrder.getProperty())
-        );
+        switch (sortOrder.getProperty()) {
+            case "createdAt":
+                return new OrderSpecifier<>(
+                        sortOrder.isAscending() ? com.querydsl.core.types.Order.ASC : com.querydsl.core.types.Order.DESC,
+                        order.createdAt
+                );
+            case "updatedAt":
+                return new OrderSpecifier<>(
+                        sortOrder.isAscending() ? com.querydsl.core.types.Order.ASC : com.querydsl.core.types.Order.DESC,
+                        order.updatedAt
+                );
+            // 다른 필드에 대한 정렬 조건 추가
+            default:
+                throw new AccessDeniedException();
+        }
     }
 
-    private BooleanExpression userEq(Long userId) {
-        return (userId != null) ? order.user.eq(findUserById(userId)) : null;
+    private BooleanExpression userEq(Long userId, User loginUser) {
+        if (isCustomer(loginUser)) {
+            if (userId != null && userId != loginUser.getId()) {
+                throw new AccessDeniedException();
+            }
+            return order.user.eq(loginUser);
+        }
+
+        return (userId != null) ? order.user.eq(findUserById(userId)) : Expressions.TRUE;
     }
 
-    private  BooleanExpression storeEq(UUID storeId) {
-        return (storeId != null) ? (order.store.eq(findStoreById(storeId))) : null;
+    private  BooleanExpression storeEq(UUID storeId, User loginUser) {
+        List<UUID> loginUserStoreList = loginUser.getStores().stream().map(store -> store.getId()).collect(Collectors.toList());
+
+        if (isOwner(loginUser)) {
+            if (storeId != null && !loginUserStoreList.contains(storeId)) {
+                throw new AccessDeniedException();
+            }
+            return order.store.id.in(loginUserStoreList);
+        }
+        return (storeId != null) ? order.store.eq(findStoreById(storeId)) : Expressions.TRUE;
     }
 
     private  BooleanExpression statusEq(OrderStatus status) {
-        return (status != null) ? (order.status.eq(status)) : null;
+        return (status != null) ? (order.status.eq(status)) : Expressions.TRUE;
     }
 
     private  BooleanExpression typeEq(OrderType type) {
-        return (type != null) ? (order.type.eq(type)) : null;
+        return (type != null) ? (order.type.eq(type)) : Expressions.TRUE;
     }
 
     private  BooleanExpression orderPaymentStatusEq(OrderPaymentStatus orderPaymentStatus) {
-        return (orderPaymentStatus != null) ? (order.orderPaymentStatus.eq(orderPaymentStatus)) : null;
+        return (orderPaymentStatus != null) ? (order.orderPaymentStatus.eq(orderPaymentStatus)) : Expressions.TRUE;
     }
 
     private  BooleanExpression showEq(String show, User loginUser) {
+
         // Customer or Owner
         if (isOwner(loginUser) || isCustomer(loginUser)) {
-            return order.deletedBy.isNull()
-                    .or(order.deletedBy.ne(loginUser)
-                            .and(order.deletedBy.role.ne(UserRole.MASTER)
-                                    .and(order.deletedBy.role.ne(UserRole.MANAGER))));
+            return order.deletedAt.isNull()
+                    .or(order.deletedBy.isNotNull()
+                            .and(order.deletedBy.ne(loginUser))
+                            .and(order.deletedBy.role.isNotNull().and(order.deletedBy.role.ne(UserRole.MASTER))));
         }
 
         // 관리자만
         if (show == "all") {
-            return null;
+            return Expressions.TRUE;
         }
 
         // 관리자만
@@ -410,43 +438,6 @@ public class OrderService {
         return order.deletedAt.isNull();
     }
 
-
-
-    private void verifyHasPermissionToGetUserOrders(Long userId, UUID storeId, User loginUser) {
-        if (userId != null && storeId != null) {
-            if (isCustomer(loginUser) || isOwner(loginUser)) {
-                if (!loginUser.getId().equals(userId)) {
-                    log.warn("권한 문제로 인한 유저 주문 조회 실패 loginUserId: {}", loginUser.getId());
-                    throw new AccessDeniedException();
-                }
-            }
-        }
-    }
-
-    private void verifyHasPermissionToGetStoreOrders(Long userId, UUID storeId, User loginUser) {
-        if (userId == null && storeId != null) {
-            if (isCustomer(loginUser)) {
-                log.warn("권한 문제로 인한 가게 주문 조회 실패 loginUserId: {}", loginUser.getId());
-                throw new AccessDeniedException();
-            }
-
-            Store store = findStoreById(storeId);
-
-            if (isOwner(loginUser) && !loginUser.getStores().contains(store)) {
-                log.warn("권한 문제로 인한 가게 주문 조회 실패 loginUserId: {}", loginUser.getId());
-                throw new AccessDeniedException();
-            }
-        }
-    }
-
-    private void verifyHasPermissionToGetAllOrders(Long userId, UUID storeId, User loginUser) {
-        if (userId == null && storeId == null) {
-            if (!isMasterOrManager(loginUser)) {
-                log.warn("권한 문제로 인한 전체 주문 조회 실패 loginUserId: {}", loginUser.getId());
-                throw new AccessDeniedException();
-            }
-        }
-    }
 
     private Store findStoreById(UUID storeId) {
         return storeRepository.findById(storeId).orElseThrow(() -> new StoreNotFoundException());
