@@ -1,6 +1,7 @@
 package com.spring.sikyozo.global.security.jwt.login.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spring.sikyozo.global.security.jwt.login.dto.UserLoginRequestDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +15,6 @@ import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 /*
     Spring Security Form Login 기반의 UsernamePasswordAuthenticationFilter를 참고하여 만든 커스텀 필터
@@ -25,8 +25,6 @@ public class JsonUsernamePasswordAuthenticationFilter extends AbstractAuthentica
     private static final String DEFAULT_LOGIN_REQUEST_URL = "/login"; // "/login"으로 오는 요청을 처리
     private static final String HTTP_METHOD = "POST"; // 로그인 HTTP 메소드는 POST
     private static final String CONTENT_TYPE = "application/json"; // JSON 타입의 데이터로 오는 로그인 요청만 처리
-    private static final String USERNAME_KEY = "username"; // 회원 로그인 시 아이디 요청 JSON Key : "username"
-    private static final String PASSWORD_KEY = "password"; // 회원 로그인 시 비밀번호 요청 JSon Key : "password"
     private static final AntPathRequestMatcher DEFAULT_LOGIN_PATH_REQUEST_MATCHER =
             new AntPathRequestMatcher(DEFAULT_LOGIN_REQUEST_URL, HTTP_METHOD); // "/login" + POST로 온 요청에 매칭
 
@@ -50,12 +48,12 @@ public class JsonUsernamePasswordAuthenticationFilter extends AbstractAuthentica
         // 요청 JSON example : {"username" : "user1", "password" : "123456789"}
         String messageBody = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
 
-        // 꺼낸 messageBody를 objectMapper.readValue()로 Map으로 변환 (Key : JSON의 키 -> username, password)
-        Map<String, String> usernamePasswordMap = objectMapper.readValue(messageBody, Map.class);
+        // 꺼낸 messageBody를 objectMapper.readValue()로 DTO로 변환 (Key : JSON의 키 -> username, password)
+        UserLoginRequestDto userLoginRequestDto = objectMapper.readValue(messageBody, UserLoginRequestDto.class);
 
-        // Map의 Key(email, password)로 해당 이메일, 패스워드 추출
-        String username = usernamePasswordMap.get(USERNAME_KEY);
-        String password = usernamePasswordMap.get(PASSWORD_KEY);
+        // DTO의 필드를 통해 username, password 값 추출
+        String username = userLoginRequestDto.getUsername();
+        String password = userLoginRequestDto.getPassword();
 
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 
